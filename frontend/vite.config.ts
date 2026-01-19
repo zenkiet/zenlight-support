@@ -6,7 +6,7 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	server: {
 		fs: {
-			allow: ['..', '../wailsjs', '../wailsjs/go', '../wailsjs/go/main', '../wailsjs/runtime']
+			allow: ['./wailsjs/go/app/App.js', './wailsjs/runtime/runtime.js']
 		}
 	}
 });

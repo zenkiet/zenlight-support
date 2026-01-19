@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
 	"window-service-watcher/internal/domain"
 
 	"github.com/nxadm/tail"
@@ -112,20 +113,27 @@ func (w *WindowsManager) StartLogWatcher(filePath string, onLog func(string), on
 			Follow: true,
 			ReOpen: true,
 			Poll:   true, // window often use polling
+			Logger: tail.DiscardingLogger,
 		})
 		if err != nil {
 			onError(err)
 			return
 		}
-		defer t.Cleanup()
+		defer func() {
+			t.Cleanup()
+			t.Stop()
+		}()
 
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			default:
-				line := <-t.Lines
-				if line == nil {
+			case line, ok := <-t.Lines:
+				if !ok {
+					return
+				}
+				if line.Err != nil {
+					onError(line.Err)
 					continue
 				}
 				onLog(line.Text)

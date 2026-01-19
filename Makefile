@@ -20,11 +20,8 @@ deps:
 	lefthook install
 
 build:
-	@echo " > Building binary..."
-	go build -ldflags="-s -w" -o $(GOBIN)/$(APP_NAME) cmd/api/main.go
-
-run:
-	go run cmd/api/main.go
+	@echo " > Building on window"
+	wails build --platform windows/amd64 -nsis
 
 format:
 	@echo " > Formatting code..."

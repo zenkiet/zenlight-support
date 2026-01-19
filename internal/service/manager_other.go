@@ -2,9 +2,65 @@
 
 package service
 
-import "window-service-watcher/internal/domain"
+import (
+	"context"
+	"sync"
 
-type MockManager struct{}
+	"window-service-watcher/internal/domain"
+
+	"github.com/nxadm/tail"
+)
+
+type MockManager struct {
+	logCancel context.CancelFunc
+	logMutex  sync.Mutex
+}
+
+// StartLogWatcher implements [domain.ServiceManager].
+func (m *MockManager) StartLogWatcher(filePath string, onLog func(string), onError func(error)) {
+	if filePath == "" {
+		return
+	}
+
+	m.StopLogWatcher()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	m.logMutex.Lock()
+	m.logCancel = cancel
+	m.logMutex.Unlock()
+
+	go func(ctx context.Context) {
+		t, err := tail.TailFile(filePath, tail.Config{
+			Follow: true,
+			ReOpen: true,
+			Poll:   true, // window often use polling
+		})
+		if err != nil {
+			onError(err)
+			return
+		}
+		defer func() {
+			t.Cleanup()
+			t.Stop()
+		}()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case line, ok := <-t.Lines:
+				if !ok {
+					return
+				}
+				if line.Err != nil {
+					onError(line.Err)
+					continue
+				}
+				onLog(line.Text)
+			}
+		}
+	}(ctx)
+}
 
 // CheckStatus implements [domain.ServiceManager].
 func (m *MockManager) CheckStatus() (domain.ServiceStatus, error) {
@@ -17,22 +73,23 @@ func (m *MockManager) CheckStatus() (domain.ServiceStatus, error) {
 
 // Connect implements [domain.ServiceManager].
 func (m *MockManager) Connect() error {
-	panic("unimplemented")
+	return nil
 }
 
 // Disconnect implements [domain.ServiceManager].
 func (m *MockManager) Disconnect() error {
-	panic("unimplemented")
-}
-
-// StartLogWatcher implements [domain.ServiceManager].
-func (m *MockManager) StartLogWatcher(filePath string, onLog func(string), onError func(error)) {
-	panic("unimplemented")
+	return nil
 }
 
 // StopLogWatcher implements [domain.ServiceManager].
 func (m *MockManager) StopLogWatcher() {
-	panic("unimplemented")
+	m.logMutex.Lock()
+	defer m.logMutex.Unlock()
+
+	if m.logCancel != nil {
+		m.logCancel()
+		m.logCancel = nil
+	}
 }
 
 func NewManager() domain.ServiceManager {

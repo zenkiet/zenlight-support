@@ -6,6 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 
 	"window-service-watcher/internal/app"
@@ -30,6 +31,8 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
+		WindowStartState: options.Minimised,
+		DisableResize:    true,
 		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 0},
 		OnStartup:        a.Startup,
 		OnShutdown:       a.Shutdown,
@@ -37,9 +40,22 @@ func main() {
 			a,
 		},
 		Windows: &windows.Options{
+			BackdropType:         windows.Mica,
 			WebviewIsTransparent: true,
 			WindowIsTranslucent:  true,
 			DisableWindowIcon:    true,
+			Theme:                windows.Dark,
+			ResizeDebounceMS:     200,
+		},
+		Mac: &mac.Options{
+			TitleBar:             mac.TitleBarHidden(),
+			Appearance:           mac.NSAppearanceNameDarkAqua,
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
+			About: &mac.AboutInfo{
+				Title:   "Zen Service Watcher",
+				Message: "Monitor your POS services",
+			},
 		},
 	})
 	if err != nil {
