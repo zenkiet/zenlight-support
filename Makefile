@@ -17,6 +17,9 @@ deps:
 	@echo " > Setting up git hooks..."
 	lefthook install
 
+	@echo " > Install Frontend dependencies..."
+	cd frontend && pnpm install
+
 dev:
 	@echo " > Starting development server..."
 	wails dev

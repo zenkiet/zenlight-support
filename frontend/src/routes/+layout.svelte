@@ -2,10 +2,12 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import UpdateModal from '$lib/components/modals/UpdateModal.svelte';
 	import { serviceStore } from '$lib/stores/services.svelte';
+	import { systemStore } from '$lib/stores/system.svelte';
 	import './layout.css';
 	let { children } = $props();
 
 	serviceStore.init();
+	systemStore.init();
 </script>
 
 <div class="flex h-screen w-screen flex-col overflow-hidden selection:bg-blue-500/30 pt-5">

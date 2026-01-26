@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"window-service-watcher/internal/domain"
 
@@ -134,15 +135,8 @@ func (a *App) InstallService(id string, files []domain.InstallFileDTO) error {
 	wailsRuntime.LogInfo(a.Ctx, "Installing service files to: "+targetPath)
 
 	// Stop service if running
-	status, err := a.mgr.GetServiceState(serviceName)
-	if err != nil {
-		return fmt.Errorf("failed to get service state: %w", err)
-	}
-	if status == domain.RUNNING {
-		wailsRuntime.LogInfo(a.Ctx, "Stopping service before installation: "+serviceName)
-		if err := a.mgr.StopService(serviceName); err != nil {
-			return fmt.Errorf("failed to stop service: %w", err)
-		}
+	if err := a.stopAndWait(serviceName); err != nil {
+		return fmt.Errorf("failed to stop service: %w", err)
 	}
 
 	if err := os.MkdirAll(targetPath, 0755); err != nil {
@@ -160,9 +154,77 @@ func (a *App) InstallService(id string, files []domain.InstallFileDTO) error {
 	wailsRuntime.LogInfo(a.Ctx, "Service files installed for: "+serviceName)
 
 	// Start service after installation
-	wailsRuntime.LogInfo(a.Ctx, "Starting service after installation: "+serviceName)
-	if err := a.mgr.StartService(serviceName); err != nil {
+	if err := a.startAndWait(serviceName); err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 	return nil
+}
+
+func (a *App) startAndWait(serviceName string) error {
+	state, err := a.mgr.GetServiceState(serviceName)
+	if err != nil {
+		return err
+	}
+
+	if state == domain.RUNNING {
+		return nil
+	}
+
+	if err := a.mgr.StartService(serviceName); err != nil {
+		return err
+	}
+
+	timeout := time.After(30 * time.Second) // timeout after 30 seconds
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			return fmt.Errorf("timeout waiting for service to start: %s", serviceName)
+		case <-ticker.C:
+			currentState, err := a.mgr.GetServiceState(serviceName)
+			if err != nil {
+				continue
+			}
+			if currentState == domain.RUNNING {
+				return nil
+			}
+		}
+	}
+}
+
+func (a *App) stopAndWait(serviceName string) error {
+	state, err := a.mgr.GetServiceState(serviceName)
+	if err != nil {
+		return err
+	}
+
+	if state == domain.STOPPED {
+		return nil
+	}
+
+	if err := a.mgr.StopService(serviceName); err != nil {
+		return err
+	}
+
+	timeout := time.After(30 * time.Second) // timeout after 30 seconds
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			return fmt.Errorf("timeout waiting for service to stop: %s", serviceName)
+		case <-ticker.C:
+			currentState, err := a.mgr.GetServiceState(serviceName)
+			if err != nil {
+				continue
+			}
+			if currentState == domain.STOPPED {
+				return nil
+			}
+		}
+	}
+
 }

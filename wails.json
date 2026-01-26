@@ -1,7 +1,7 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "service-watcher",
-  "description": "Widget Monitor Blogic POS Services on Windows",
+  "description": "A lightweight, modern desktop application for real-time monitoring and management of Windows services.",
   "outputfilename": "service-watcher",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",
@@ -12,7 +12,7 @@
     "email": "kietgolx65234@gmail.com"
   },
   "info": {
-    "companyName": "Blogic Systems",
+    "companyName": "ZenSoftware",
     "productName": "Service Watcher",
     "productVersion": "1.0.0",
     "copyright": "© 2026, Powered by ZenSoftware"

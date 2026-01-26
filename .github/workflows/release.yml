@@ -45,11 +45,20 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
+      - name: Install NSIS
+        uses: repolevedavaj/install-nsis@v1.1.0
+        with:
+          nsis-version: 3.11
+
       - name: Build Windows Binary
-        run: wails build -platform windows/amd64 -clean -ldflags "-X 'main.Version=${{ github.ref_name }}'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'window-service-watcher/internal/app.Version=${{ github.ref_name }}' -X 'window-service-watcher/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/bin/service-watcher.exe
-          generate_release_notes: true
+          files: |
+            build/bin/service-watcher.exe
+            build/bin/service-watcher-amd64-installer.exe

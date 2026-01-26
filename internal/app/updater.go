@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,91 +9,106 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-version"
 	"github.com/minio/selfupdate"
 )
 
 var Version = "v1.0.0"
+var GH_TOKEN = "" // replace with your GitHub token
 
-const URL = "https://api.github.com/repos/zenkiet/window_service_watcher/releases/latest"
-
-type ReleaseInfo struct {
-	TagName string `json:"tagName"`
-	Body    string `json:"body"`
-	Assets  []struct {
-		Name        string `json:"name"`
-		DownloadURL string `json:"downloadUrl"`
-	} `json:"assets"`
-}
+const RepoURL = "https://api.github.com/repos/zenkiet/window-service-watcher/releases/latest"
 
 type UpdateInfo struct {
-	Available      bool   `json:"available"`
-	CurrentVersion string `json:"currentVersion,omitempty"`
-	LatestVersion  string `json:"latestVersion,omitempty"`
-	ReleaseNotes   string `json:"releaseNotes,omitempty"`
-	DownloadURL    string `json:"downloadUrl,omitempty"`
+	Available    bool   `json:"available"`
+	CurrentVer   string `json:"currentVersion"`
+	Build        string `json:"build,omitempty"`
+	LatestVer    string `json:"latestVersion"`
+	ReleaseNotes string `json:"releaseNotes"`
+	DownloadURL  string `json:"downloadUrl"`
+	Error        string `json:"error,omitempty"`
 }
 
-func (a *App) CheckUpdate() (UpdateInfo, error) {
-	if runtime.GOOS != "windows" {
-		return UpdateInfo{}, fmt.Errorf("only supported on windows")
+type asset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+}
+
+type Release struct {
+	TagName   string  `json:"tag_name"`
+	CreatedAt string  `json:"created_at"`
+	Body      string  `json:"body"`
+	Assets    []asset `json:"assets"`
+}
+
+func (a *App) CheckUpdate() UpdateInfo {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", RepoURL, nil)
+	req.Header.Set("Authorization", "token "+GH_TOKEN)
+	if err != nil {
+		return errorUpdateInfo(err)
 	}
 
-	resp, err := http.Get(URL)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		return UpdateInfo{}, fmt.Errorf("failed to fetch release info: %w", err)
+		return errorUpdateInfo(err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return UpdateInfo{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return errorUpdateInfo(fmt.Errorf("unexpected status code: %d", resp.StatusCode))
 	}
 
-	var release ReleaseInfo
+	var release Release
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return UpdateInfo{}, fmt.Errorf("failed to decode release info: %w", err)
+		return errorUpdateInfo(fmt.Errorf("failed to decode release info: %w", err))
 	}
+
+	fmt.Println("Checking for updates...")
 
 	current, _ := version.NewVersion(Version)
 	latest, err := version.NewVersion(release.TagName)
+	if err != nil {
+		return errorUpdateInfo(fmt.Errorf("invalid tag format in release: %s", release.TagName))
+	}
 
 	if latest.LessThanOrEqual(current) {
-		return UpdateInfo{Available: false, CurrentVersion: Version}, nil
+		return UpdateInfo{Available: false, CurrentVer: Version, LatestVer: release.TagName, Build: release.CreatedAt}
 	}
 
-	var downloadURL = ""
-	targetExt := ".exe"
-	for _, asset := range release.Assets {
-		if strings.HasSuffix(asset.Name, targetExt) {
-			downloadURL = asset.DownloadURL
-			break
-		}
-	}
-
+	downloadURL := findAsset(release.Assets)
 	if downloadURL == "" {
-		return UpdateInfo{}, fmt.Errorf("no suitable asset found for download")
+		return errorUpdateInfo(fmt.Errorf("no suitable asset found for download"))
 	}
 
 	return UpdateInfo{
-		Available:      true,
-		CurrentVersion: Version,
-		LatestVersion:  release.TagName,
-		ReleaseNotes:   release.Body,
-		DownloadURL:    downloadURL,
-	}, nil
+		Available:    true,
+		CurrentVer:   Version,
+		Build:        release.CreatedAt,
+		LatestVer:    release.TagName,
+		ReleaseNotes: release.Body,
+		DownloadURL:  downloadURL,
+	}
 }
 
-func (a *App) Update(downloadURL string) error {
+func (a *App) DoUpdate(downloadURL string) error {
+	if runtime.GOOS != "windows" {
+		return fmt.Errorf("only supported on windows")
+	}
+
 	resp, err := http.Get(downloadURL)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download update")
+		return fmt.Errorf("failed to download update: %w", err)
 	}
 	defer resp.Body.Close()
 
 	err = selfupdate.Apply(resp.Body, selfupdate.Options{})
 	if err != nil {
-		return fmt.Errorf("update failed: %v", err)
+		return fmt.Errorf("update failed: %w", err)
 	}
 	return nil
 }
@@ -102,4 +118,28 @@ func (a *App) RestartApp() {
 	cmd := exec.Command(selfExecutable)
 	cmd.Start()
 	os.Exit(0)
+}
+
+func errorUpdateInfo(err error) UpdateInfo {
+	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: Version}
+}
+
+func findAsset(assets []asset) string {
+	targetExt := ".exe"
+	targetArch := runtime.GOARCH
+
+	for _, asset := range assets {
+		name := strings.ToLower(asset.Name)
+		if !strings.HasSuffix(name, targetExt) {
+			continue
+		}
+		if strings.Contains(name, "amd64") && targetArch != "amd64" {
+			continue
+		}
+		if strings.Contains(name, "arm64") && targetArch != "arm64" {
+			continue
+		}
+		return asset.BrowserDownloadURL
+	}
+	return ""
 }

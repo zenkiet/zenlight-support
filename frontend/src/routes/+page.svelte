@@ -11,7 +11,7 @@
 	<header class="flex shrink-0 flex-col gap-5 px-6 pt-6 pb-2">
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-4">
-				<h1 class="text-2xl font-bold tracking-tight text-white">Zen Service Watcher</h1>
+				<h1 class="text-2xl font-bold tracking-tight text-white">Service Watcher</h1>
 
 				<div class="flex items-center gap-2 border-l border-white/10 pl-4">
             <!-- <div class="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-xs font-medium text-white/50 ring-1 ring-inset ring-white/10">

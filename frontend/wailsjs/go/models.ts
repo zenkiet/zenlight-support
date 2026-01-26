@@ -2,10 +2,12 @@ export namespace app {
 	
 	export class UpdateInfo {
 	    available: boolean;
-	    currentVersion?: string;
-	    latestVersion?: string;
-	    releaseNotes?: string;
-	    downloadUrl?: string;
+	    currentVersion: string;
+	    build?: string;
+	    latestVersion: string;
+	    releaseNotes: string;
+	    downloadUrl: string;
+	    error?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UpdateInfo(source);
@@ -15,9 +17,11 @@ export namespace app {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.available = source["available"];
 	        this.currentVersion = source["currentVersion"];
+	        this.build = source["build"];
 	        this.latestVersion = source["latestVersion"];
 	        this.releaseNotes = source["releaseNotes"];
 	        this.downloadUrl = source["downloadUrl"];
+	        this.error = source["error"];
 	    }
 	}
 

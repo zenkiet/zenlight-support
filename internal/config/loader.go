@@ -10,6 +10,8 @@ import (
 	"go.yaml.in/yaml/v4"
 )
 
+const fileName = "config.yaml"
+
 func DefaultConfig() domain.Config {
 	return domain.Config{
 		Services: []domain.ServiceConfig{
@@ -25,7 +27,7 @@ func DefaultConfig() domain.Config {
 	}
 }
 
-func LoadConfig(fileName string) (*domain.Config, error) {
+func LoadConfig() (*domain.Config, error) {
 	exePath, err := os.Executable()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get executable path: %w", err)

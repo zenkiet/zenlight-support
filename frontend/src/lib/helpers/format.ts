@@ -22,3 +22,12 @@ export function formatBytes(bytes: number, decimals = 2) {
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
+
+export function formatDate(dateString: string): string {
+	if(!dateString) return '';
+	const date = new Date(dateString);
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}.${month}.${day}`;
+}

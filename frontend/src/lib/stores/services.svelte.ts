@@ -123,7 +123,6 @@ export class ServiceStore {
 		if (this.initialized) return;
 		try {
 			const configs = await GetConfig();
-			console.log('Loaded config in ServiceStore:', configs);
 
 			const sMap = new SvelteMap<string, Service>();
 			configs.services.forEach((config) => {

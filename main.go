@@ -21,7 +21,7 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-const uniqueAppID = "com.zensoftware.zwatcher"
+const uniqueAppID = "com.zensoftware.service-watcher"
 
 func main() {
 	// Set up log output for debugging
@@ -33,9 +33,9 @@ func main() {
 	slog.SetDefault(logger)
 
 	// Load configuration
-	cfg, err := config.LoadConfig("config.yaml")
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		slog.Error("error loading config: %v", err)
+		slog.Error("Failed to load config:", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -47,14 +47,14 @@ func main() {
 	// appMenu := menu.NewMenu()
 	// fileMenu := appMenu.AddSubmenu("File")
 	// fileMenu.AddText("Open Dashboard", keys.CmdOrCtrl("o"), func(_ *menu.CallbackData) {
-	// 	wailsRuntime.WindowShow(a.Ctx)
-	// 	wailsRuntime.WindowSetAlwaysOnTop(a.Ctx, true)
-	// 	wailsRuntime.WindowSetAlwaysOnTop(a.Ctx, false)
+	//  wailsRuntime.WindowShow(a.Ctx)
+	//  wailsRuntime.WindowSetAlwaysOnTop(a.Ctx, true)
+	//  wailsRuntime.WindowSetAlwaysOnTop(a.Ctx, false)
 	// })
 	// fileMenu.AddSeparator()
 	// fileMenu.AddText("Quit", keys.CmdOrCtrl("q"), func(_ *menu.CallbackData) {
-	// 	a.ForceQuit()
-	// 	wailsRuntime.Quit(a.Ctx)
+	//  a.ForceQuit()
+	//  wailsRuntime.Quit(a.Ctx)
 	// })
 
 	// Create application with options
@@ -83,14 +83,14 @@ func main() {
 			},
 		},
 		// OnBeforeClose: func(ctx context.Context) (prevent bool) {
-		// 	if !a.IsQuitting() {
-		// 		slog.Info("User clicked close, hiding window to background")
+		//  if !a.IsQuitting() {
+		//    slog.Info("User clicked close, hiding window to background")
 
-		// 		wailsRuntime.WindowHide(ctx)
-		// 		wailsRuntime.EventsEmit(ctx, "notification", "Zen Watcher is running in background")
-		// 		return true
-		// 	}
-		// 	return false
+		//    wailsRuntime.WindowHide(ctx)
+		//    wailsRuntime.EventsEmit(ctx, "notification", "Zen Watcher is running in background")
+		//    return true
+		//  }
+		//  return false
 		// },
 		Windows: &windows.Options{
 			BackdropType:        windows.Mica,
@@ -103,7 +103,7 @@ func main() {
 			Appearance:          mac.NSAppearanceNameDarkAqua,
 			WindowIsTranslucent: true,
 			About: &mac.AboutInfo{
-				Title:   "Window Service Watcher",
+				Title:   "Service Watcher",
 				Message: "Monitor your POS services",
 			},
 		},

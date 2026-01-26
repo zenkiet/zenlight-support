@@ -6,6 +6,10 @@ export function CheckUpdate() {
   return window['go']['app']['App']['CheckUpdate']();
 }
 
+export function DoUpdate(arg1) {
+  return window['go']['app']['App']['DoUpdate'](arg1);
+}
+
 export function GetConfig() {
   return window['go']['app']['App']['GetConfig']();
 }
@@ -32,8 +36,4 @@ export function StartService(arg1) {
 
 export function StopService(arg1) {
   return window['go']['app']['App']['StopService'](arg1);
-}
-
-export function Update(arg1) {
-  return window['go']['app']['App']['Update'](arg1);
 }

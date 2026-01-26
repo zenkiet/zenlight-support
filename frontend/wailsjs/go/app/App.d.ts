@@ -5,6 +5,8 @@ import {domain} from '../models';
 
 export function CheckUpdate():Promise<app.UpdateInfo>;
 
+export function DoUpdate(arg1:string):Promise<void>;
+
 export function GetConfig():Promise<domain.Config>;
 
 export function GetServiceStatus(arg1:string):Promise<domain.Status>;
@@ -18,5 +20,3 @@ export function RestartApp():Promise<void>;
 export function StartService(arg1:string):Promise<void>;
 
 export function StopService(arg1:string):Promise<void>;
-
-export function Update(arg1:string):Promise<void>;

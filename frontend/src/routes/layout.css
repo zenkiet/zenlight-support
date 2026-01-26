@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @plugin '@iconify/tailwind4' {
-	icon-sets: from-json(duotone, 'src/icons/duotone.json'), from-json(brand, 'src/icons/brand.json');
+	icon-sets: from-json(duotone, 'src/icons/duotone.json');
 }
 
 /* Theme variants (Tailwind v4) */
