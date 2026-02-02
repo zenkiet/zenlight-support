@@ -99,7 +99,6 @@ func main() {
 			Theme:               windows.Dark,
 		},
 		Mac: &mac.Options{
-			TitleBar:            mac.TitleBarHiddenInset(),
 			Appearance:          mac.NSAppearanceNameDarkAqua,
 			WindowIsTranslucent: true,
 			About: &mac.AboutInfo{

@@ -2,15 +2,16 @@ package domain
 
 type Status int8
 
+// don't care other states
 const (
-	ERROR Status = iota
-	STOPPED
-	START_PENDING
-	STOP_PENDING
-	RUNNING
-	CONTINUE_PENDING
-	PAUSE_PENDING
-	PAUSED
+	// ERROR Status = iota
+	STOPPED = 1
+	// START_PENDING
+	// STOP_PENDING
+	RUNNING = 4
+	// CONTINUE_PENDING
+	// PAUSE_PENDING
+	// PAUSED
 )
 
 type InstallFileDTO struct {

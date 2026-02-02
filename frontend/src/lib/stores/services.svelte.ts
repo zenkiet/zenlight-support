@@ -1,23 +1,11 @@
 import { SvelteMap } from 'svelte/reactivity';
-import {
-	GetConfig,
-	StartService,
-	StopService,
-	OpenExplorer,
-	InstallService
-} from '../../../wailsjs/go/app/App';
 import { domain } from '../../../wailsjs/go/models';
-import { EventsOn } from '../../../wailsjs/runtime';
+import { useWailsEvent } from '$lib/services/wails-event';
+import { WailsBridge } from '$lib/services/wails-bridge';
 
 export enum Status {
-	ERROR = 0,
 	STOPPED = 1,
-	START_PENDING = 2,
-	STOP_PENDING = 3,
-	RUNNING = 4,
-	CONTINUE_PENDING = 5,
-	PAUSE_PENDING = 6,
-	PAUSED = 7
+	RUNNING = 4
 }
 
 export interface ServiceMetrics {
@@ -43,18 +31,15 @@ export interface ServiceData {
 }
 
 export class Service {
-	id: string;
-	name: string;
-	description: string;
-	installable: boolean = false;
+	/** Props */
+	readonly id: string;
+	readonly name: string;
+	readonly description: string;
+	readonly installable: boolean = false;
 
+	/** States */
 	status = $state<Status>(Status.STOPPED);
-	metrics = $state<ServiceMetrics>({
-		pid: 0,
-		createTime: 0,
-		cpu: 0,
-		mem: 0
-	});
+	metrics = $state<ServiceMetrics>({ pid: 0, createTime: 0, cpu: 0, mem: 0 });
 	loading = $state<boolean>(true);
 
 	constructor(config: ServiceData) {
@@ -69,39 +54,64 @@ export class Service {
 	}
 
 	update(data: ServiceStatus) {
-		this.status = data.status;
+		if (this.status !== data.status) {
+			this.status = data.status;
+		}
+
 		if (data.metrics) {
 			this.metrics = data.metrics;
 		}
 
-		if (this.loading && [Status.RUNNING, Status.STOPPED].includes(data.status)) {
-			this.loading = false;
-		}
+		this.loading = false;
 	}
 
 	async start() {
+		if (this.loading || this.status === Status.RUNNING) return;
+
+		const prevStatus = this.status;
 		this.loading = true;
-		await StartService(this.id);
+
+		const result = await WailsBridge.service.start(this.id);
+		if (!result.success) {
+			this.status = prevStatus;
+			this.loading = false;
+			console.error(`Failed to start ${this.name}:`, result.error);
+			throw new Error(result.error);
+		}
 	}
 
 	async stop() {
+		if (this.loading || this.status === Status.RUNNING) return;
+
+		const prevStatus = this.status;
+		const previousMetrics = { ...this.metrics };
+
+		this.metrics = { pid: 0, createTime: 0, cpu: 0, mem: 0 };
 		this.loading = true;
-		await StopService(this.id).then(() => {
-			this.metrics = {
-				pid: 0,
-				createTime: 0,
-				cpu: 0,
-				mem: 0
-			};
-		});
+
+		const result = await WailsBridge.service.stop(this.id);
+		if (!result.success) {
+			this.status = prevStatus;
+			this.metrics = previousMetrics;
+			this.loading = false;
+			console.error(`Failed to stop ${this.name}:`, result.error);
+			throw new Error(result.error);
+		}
 	}
 
 	async openExplorer() {
-		await OpenExplorer(this.id);
+		await WailsBridge.service.openExplorer(this.id);
 	}
 
 	async install(files: domain.InstallFileDTO[]) {
-		await InstallService(this.id, files);
+		this.loading = true;
+		const result = await WailsBridge.service.install(this.id, files);
+		this.loading = false;
+
+		if (!result.success) {
+			console.error(`Failed to install ${this.name}:`, result.error);
+			throw result.error;
+		}
 	}
 }
 
@@ -109,47 +119,46 @@ export class ServiceStore {
 	private _services = new SvelteMap<string, Service>();
 	services = $derived(Array.from(this._services.values()));
 
+	/** Derived */
 	totalCount = $derived(this.services.length);
-	runningCount = $derived(
-		this.services.filter((service) => service.status === Status.RUNNING).length
-	);
-	stoppedCount = $derived(
-		this.services.filter((service) => service.status === Status.STOPPED).length
-	);
+	runningCount = $derived(this.services.filter((s) => s.status === Status.RUNNING).length);
+	stoppedCount = $derived(this.services.filter((s) => s.status === Status.STOPPED).length);
 
+	/** States */
 	initialized = $state<boolean>(false);
+
+	constructor() {
+		useWailsEvent<ServiceStatus[]>(`services-update`, (updates) => {
+			updates.forEach((update) => {
+				const service = this._services.get(update.id);
+				if (service) {
+					service.update(update);
+				}
+			});
+		});
+	}
 
 	async init() {
 		if (this.initialized) return;
-		try {
-			const configs = await GetConfig();
 
-			const sMap = new SvelteMap<string, Service>();
-			configs.services.forEach((config) => {
-				sMap.set(
-					config.id,
+		const result = await WailsBridge.service.get();
+		if (result.success) {
+			this._services.clear();
+			result.data.forEach((service) => {
+				this._services.set(
+					service.id,
 					new Service({
-						id: config.id,
-						name: config.name,
-						description: config.description,
-						installable: config.installable,
+						id: service.id,
+						name: service.name,
+						description: service.description,
+						installable: service.installable,
 						status: Status.STOPPED
 					})
 				);
 			});
-			this._services = sMap;
 			this.initialized = true;
-
-			EventsOn(`services-update`, (updates: ServiceStatus[]) => {
-				updates.forEach((update) => {
-					const service = this._services.get(update.id);
-					if (service) {
-						service.update(update);
-					}
-				});
-			});
-		} catch (err) {
-			console.error('Error loading config in ServiceStore:', err);
+		} else {
+			console.error('Error fetching services:', result.error);
 		}
 	}
 }

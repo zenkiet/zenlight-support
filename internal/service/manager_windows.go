@@ -5,6 +5,7 @@ package service
 import (
 	"fmt"
 	"sync"
+	"time"
 	"unsafe"
 	"window-service-watcher/internal/domain"
 
@@ -14,7 +15,9 @@ import (
 )
 
 type processHandle struct {
-	proc *process.Process
+	proc       *process.Process
+	lastPID    int32
+	lastUpdate time.Time
 }
 
 type WindowsManager struct {
@@ -81,20 +84,22 @@ func (w *WindowsManager) GetServiceMetrics(serviceName string) (*domain.ServiceM
 		return nil, nil
 	}
 
+	currentPID := int32(status.ProcessId)
+	metrics := &domain.ServiceMetrics{PID: status.ProcessId}
+
 	w.mu.Lock()
-	handle, ok := w.processCache[serviceName]
-	if !ok || handle.proc.Pid != int32(status.ProcessId) {
-		p, err := process.NewProcess(int32(status.ProcessId))
+	handle, exists := w.processCache[serviceName]
+
+	if !exists || handle.lastPID != currentPID {
+		p, err := process.NewProcess(currentPID)
 		if err != nil {
 			w.mu.Unlock()
 			return nil, err
 		}
-		handle = &processHandle{proc: p}
+		handle = &processHandle{proc: p, lastPID: currentPID}
 		w.processCache[serviceName] = handle
 	}
 	w.mu.Unlock()
-
-	metrics := &domain.ServiceMetrics{PID: status.ProcessId}
 
 	if cpu, err := handle.proc.CPUPercent(); err == nil {
 		metrics.CPUUsage = cpu

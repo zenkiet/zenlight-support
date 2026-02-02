@@ -7,20 +7,23 @@ import (
 	"window-service-watcher/internal/domain"
 )
 
+const (
+	MaxConcurrentChecks = 5
+	ScanInterval        = 5 * time.Second
+)
+
 type ServiceWatcher struct {
 	cfg        domain.Config
 	mgr        domain.ServiceManager
 	lastStatus sync.Map
 	updates    chan []domain.ServiceStatus
-	interval   time.Duration
 }
 
 func NewServiceWatcher(cfg domain.Config, mgr domain.ServiceManager) *ServiceWatcher {
 	return &ServiceWatcher{
-		cfg:      cfg,
-		mgr:      mgr,
-		updates:  make(chan []domain.ServiceStatus, 10),
-		interval: 5 * time.Second,
+		cfg:     cfg,
+		mgr:     mgr,
+		updates: make(chan []domain.ServiceStatus, 10),
 	}
 }
 
@@ -29,7 +32,7 @@ func (sw *ServiceWatcher) Updates() <-chan []domain.ServiceStatus {
 }
 
 func (sw *ServiceWatcher) Start(ctx context.Context) {
-	ticket := time.NewTicker(sw.interval)
+	ticket := time.NewTicker(ScanInterval)
 	defer ticket.Stop()
 
 	for {
