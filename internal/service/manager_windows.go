@@ -4,6 +4,8 @@ package service
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 	"unsafe"
@@ -24,6 +26,44 @@ type WindowsManager struct {
 	mgr          *mgr.Mgr
 	mu           sync.RWMutex
 	processCache map[string]*processHandle
+}
+
+// GetDirectoryMetrics implements [domain.ResourceManager].
+func (w *WindowsManager) GetDirectoryMetrics(path string) (*domain.ResourceMetrics, error) {
+	cleanPath := filepath.Clean(os.ExpandEnv(path))
+
+	info, err := os.Stat(cleanPath)
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, fmt.Errorf("path is not a directory: %s", cleanPath)
+	}
+
+	var totalSize int64
+	var lastModified int64
+
+	err = filepath.Walk(cleanPath, func(_ string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !fi.IsDir() {
+			totalSize += fi.Size()
+			modTime := fi.ModTime().UnixNano() / 1e6
+			if modTime > lastModified {
+				lastModified = modTime
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.ResourceMetrics{
+		TotalSize:    totalSize,
+		LastModified: lastModified,
+	}, nil
 }
 
 // Connect implements [domain.ServiceManager].
@@ -54,8 +94,8 @@ func (w *WindowsManager) Disconnect() error {
 	return err
 }
 
-// GetServiceMetrics implements [domain.ServiceManager].
-func (w *WindowsManager) GetServiceMetrics(serviceName string) (*domain.ServiceMetrics, error) {
+// GetServiceMetrics implements [domain.ResourceManager].
+func (w *WindowsManager) GetServiceMetrics(serviceName string) (*domain.ResourceMetrics, error) {
 	w.mu.RLock()
 	m := w.mgr
 	w.mu.RUnlock()
@@ -85,7 +125,7 @@ func (w *WindowsManager) GetServiceMetrics(serviceName string) (*domain.ServiceM
 	}
 
 	currentPID := int32(status.ProcessId)
-	metrics := &domain.ServiceMetrics{PID: status.ProcessId}
+	metrics := &domain.ResourceMetrics{PID: status.ProcessId}
 
 	w.mu.Lock()
 	handle, exists := w.processCache[serviceName]
@@ -118,8 +158,8 @@ func (w *WindowsManager) GetServiceMetrics(serviceName string) (*domain.ServiceM
 	return metrics, nil
 }
 
-// GetServiceState implements [domain.ServiceManager].
-func (w *WindowsManager) GetServiceState(serviceName string) (domain.Status, error) {
+// GetResourceState implements [domain.ResourceManager].
+func (w *WindowsManager) GetResourceState(serviceName string) (domain.Status, error) {
 	w.mu.RLock()
 	m := w.mgr
 	w.mu.RUnlock()
@@ -158,7 +198,7 @@ func (w *WindowsManager) StartService(serviceName string) error {
 	return s.Start()
 }
 
-// StopService implements [domain.ServiceManager].
+// StopResource implements [domain.ResourceManager].
 func (w *WindowsManager) StopService(serviceName string) error {
 	w.mu.RLock()
 	m := w.mgr
@@ -175,7 +215,7 @@ func (w *WindowsManager) StopService(serviceName string) error {
 	return err
 }
 
-func NewManager() domain.ServiceManager {
+func NewManager() domain.ResourceManager {
 	return &WindowsManager{
 		processCache: make(map[string]*processHandle),
 	}

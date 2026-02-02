@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { formatRelativeTime, readFileAsBytes } from '$lib/helpers';
-	import { Status, type Service } from '$lib/stores/services.svelte';
+	import type { Resource } from '$lib/stores/resources.svelte';
 	import InstallModal from './modals/InstallModal.svelte';
 
-	let { service } = $props<{ service: Service }>();
-
-	const isRunning = $derived(service.status === Status.RUNNING);
+	let { service } = $props<{ service: Resource }>();
 
 	let showInstallModal = $state(false);
 
@@ -36,26 +34,26 @@
 
 			<div class="flex flex-col">
 				<div class="flex items-center">
-					<span class="mr-2 h-2 w-2 shrink-0 rounded-full {isRunning ? 'bg-emerald-500' : service.loading ? 'bg-muted/50' : 'bg-rose-500'}"
+					<span class="mr-2 h-2 w-2 shrink-0 rounded-full {service.isRunning ? 'bg-emerald-500' : service.loading ? 'bg-muted/50' : 'bg-rose-500'}"
 					></span>
-					<h3 class="truncate font-semibold" title={service.name}>
+					<h3 class="truncate font-semibold" title={service.config?.name}>
 						<button class="hover:underline cursor-pointer hover:text-accent transition-colors duration-200" onclick={() => service.openExplorer()}>
-							{service.name}
+							{service.config?.name}
 						</button>
 					</h3>
 				</div>
 
 				<p
 					class="line-clamp-2 min-h-[2.5em] text-xs leading-relaxed text-muted/80"
-					title={service.description}
+					title={service.config?.description}
 				>
-					{service.description}
+					{service.config?.description}
 				</p>
 			</div>
 		</div>
 
 		<div class="flex gap-2">
-			{#if service.installable}
+			{#if service.config?.installable}
 				<button
 					title="install service"
 					onclick={() => (showInstallModal = true)}
@@ -66,7 +64,7 @@
 			{/if}
 
 			<button
-				onclick={isRunning ? () => service.stop() : () => service.start()}
+				onclick={service.isRunning ? () => service.stop() : () => service.start()}
 				disabled={service.loading}
 				class={`
        cursor-pointer text-muted/80 transition-colors hover:text-main
@@ -75,7 +73,7 @@
 			>
 				{#if service.loading}
 					<span class="animate-spin icon-[regular--spinner]"></span>
-				{:else if isRunning}
+				{:else if service.isRunning}
 					<span class="icon-[regular--pause]"></span>
 				{:else}
 					<span class="icon-[regular--play]"></span>
@@ -107,7 +105,7 @@
 
 <InstallModal
 	isOpen={showInstallModal}
-	targetName={service.name}
+	targetName={service.config?.name}
 	onClose={() => (showInstallModal = false)}
 	onInstall={handleInstall}
 />

@@ -2,17 +2,18 @@
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
 	import UpdateModal from '$lib/components/modals/UpdateModal.svelte';
-	import { serviceStore } from '$lib/stores/services.svelte';
-	import { systemStore } from '$lib/stores/system.svelte';
+	import { resourceStore } from '$lib/stores/resources.svelte';
 	import { fade } from 'svelte/transition';
 	import './layout.css';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	let isSidebarOpen = $state(false);
 
-	serviceStore.init();
-	systemStore.init();
+	onMount(() => {
+		resourceStore.init();
+	});
 </script>
 
 <div
@@ -24,7 +25,7 @@
 		<div class="flex items-center gap-2">
 			<button
 				onclick={() => (isSidebarOpen = true)}
-				class="cursor-pointer inline-flex hover:bg-surface-highlight rounded-md p-2 text-muted transition-colors hover:text-main"
+				class="hover:bg-surface-highlight inline-flex cursor-pointer rounded-md p-2 text-muted transition-colors hover:text-main"
 				aria-label="Open menu"
 			>
 				<i class="size-5 icon-[regular--list]"></i>
@@ -34,7 +35,7 @@
 	</header>
 
 	<main class="relative flex flex-1 overflow-hidden">
-		{#if serviceStore.initialized}
+		{#if resourceStore.initialized}
 			<div class="flex h-full w-full overflow-hidden" in:fade={{ duration: 400 }}>
 				{#if isSidebarOpen}
 					<button

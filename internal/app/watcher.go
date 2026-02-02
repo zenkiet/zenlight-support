@@ -8,26 +8,25 @@ import (
 )
 
 const (
-	MaxConcurrentChecks = 5
-	ScanInterval        = 5 * time.Second
+	ScanInterval = 5 * time.Second
 )
 
 type ServiceWatcher struct {
 	cfg        domain.Config
-	mgr        domain.ServiceManager
+	mgr        domain.ResourceManager
 	lastStatus sync.Map
-	updates    chan []domain.ServiceStatus
+	updates    chan []domain.ResourceStatus
 }
 
-func NewServiceWatcher(cfg domain.Config, mgr domain.ServiceManager) *ServiceWatcher {
+func NewServiceWatcher(cfg domain.Config, mgr domain.ResourceManager) *ServiceWatcher {
 	return &ServiceWatcher{
 		cfg:     cfg,
 		mgr:     mgr,
-		updates: make(chan []domain.ServiceStatus, 10),
+		updates: make(chan []domain.ResourceStatus, 10),
 	}
 }
 
-func (sw *ServiceWatcher) Updates() <-chan []domain.ServiceStatus {
+func (sw *ServiceWatcher) Updates() <-chan []domain.ResourceStatus {
 	return sw.updates
 }
 
@@ -46,21 +45,25 @@ func (sw *ServiceWatcher) Start(ctx context.Context) {
 }
 
 func (sw *ServiceWatcher) tick() {
-	var changed []domain.ServiceStatus
+	var changed []domain.ResourceStatus
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
-	for _, svcCfg := range sw.cfg.Services {
+	for _, svcCfg := range sw.cfg.Resources {
+		if svcCfg.Type != domain.ServiceType {
+			continue
+		}
+
 		wg.Add(1)
-		go func(cfg domain.ServiceConfig) {
+		go func(cfg domain.ResourceConfig) {
 			defer wg.Done()
 
-			status, err := sw.mgr.GetServiceState(cfg.ServiceName)
+			status, err := sw.mgr.GetResourceState(cfg.ServiceName)
 			if err != nil {
 				status = domain.STOPPED
 			}
 
-			current := domain.ServiceStatus{
+			current := domain.ResourceStatus{
 				ID:     cfg.ID,
 				Status: status,
 			}
@@ -91,12 +94,12 @@ func (sw *ServiceWatcher) tick() {
 	}
 }
 
-func (sw *ServiceWatcher) hasChanged(id string, current domain.ServiceStatus) bool {
+func (sw *ServiceWatcher) hasChanged(id string, current domain.ResourceStatus) bool {
 	val, ok := sw.lastStatus.Load(id)
 	if !ok {
 		return true
 	}
-	old := val.(domain.ServiceStatus)
+	old := val.(domain.ResourceStatus)
 
 	// Check status
 	if old.Status != current.Status {

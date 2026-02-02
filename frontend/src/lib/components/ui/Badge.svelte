@@ -1,16 +1,18 @@
 <script lang="ts">
   let { type, count, label } = $props< {
-    type: 'success' | 'danger';
+    type: 'success' | 'danger' | 'info';
     count?: number;
     label: string;
   }>();
 
   const styles: Record<string, string> = {
+    info: 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
     success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
     danger: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
   };
 
   const dotColor: Record<string, string> = {
+    info: 'bg-blue-500 shadow-glow-blue',
     success: 'bg-emerald-500 shadow-glow-green',
     danger: 'bg-rose-500 shadow-glow-red'
   };

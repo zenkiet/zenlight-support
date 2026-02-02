@@ -11,9 +11,17 @@ type MockManager struct {
 	// logMutex  sync.Mutex
 }
 
-// GetServiceMetrics implements [domain.ServiceManager].
-func (m *MockManager) GetServiceMetrics(serviceName string) (*domain.ServiceMetrics, error) {
-	return &domain.ServiceMetrics{
+// GetDirectoryMetrics implements [domain.ResourceManager].
+func (m *MockManager) GetDirectoryMetrics(path string) (*domain.ResourceMetrics, error) {
+	return &domain.ResourceMetrics{
+		TotalSize:    204857600,
+		LastModified: 16251588000000,
+	}, nil
+}
+
+// GetServiceMetrics implements [domain.ResourceManager].
+func (m *MockManager) GetServiceMetrics(serviceName string) (*domain.ResourceMetrics, error) {
+	return &domain.ResourceMetrics{
 		PID:        1234,
 		CreateTime: 16251588000000,
 		CPUUsage:   2.5,
@@ -21,12 +29,12 @@ func (m *MockManager) GetServiceMetrics(serviceName string) (*domain.ServiceMetr
 	}, nil
 }
 
-// GetServiceState implements [domain.ServiceManager].
-func (m *MockManager) GetServiceState(serviceName string) (domain.Status, error) {
+// GetResourceState implements [domain.ResourceManager].
+func (m *MockManager) GetResourceState(serviceName string) (domain.Status, error) {
 	return domain.RUNNING, nil
 }
 
-// StartService implements [domain.ServiceManager].
+// StartResource implements [domain.ResourceManager].
 func (m *MockManager) StartService(serviceName string) error {
 	return nil
 }
@@ -103,6 +111,6 @@ func (m *MockManager) Disconnect() error {
 // 	}
 // }
 
-func NewManager() domain.ServiceManager {
+func NewManager() domain.ResourceManager {
 	return &MockManager{}
 }

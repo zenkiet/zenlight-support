@@ -96,12 +96,11 @@
 </script>
 
 {#if isOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
 		<div
 			class="relative flex min-h-75 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-muted/15 bg-page ring-1 ring-muted/10"
 			role="none"
 			transition:scale={{ start: 0.96, duration: 250, easing: cubicOut }}
-			onclick={(e) => e.stopPropagation()}
 		>
 			{#if status === 'idle'}
 				<div class="flex shrink-0 items-center justify-between border-b border-muted/10 px-5 py-4">
@@ -182,9 +181,9 @@
 										<button
 											onclick={() => removeFile(i)}
 											title="Remove File"
-											class="cursor-pointer text-muted/30 opacity-0 transition-all hover:text-rose-400"
+											class="cursor-pointer text-muted/30 transition-all hover:text-rose-400"
 										>
-											<i class="icon-[regular--x]"></i>
+											<i class="size-3 icon-[regular--x]"></i>
 										</button>
 									</div>
 								{/each}
@@ -202,11 +201,7 @@
 						>Cancel</button
 					>
 					<button
-						onclick={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							submit();
-						}}
+						onclick={submit}
 						disabled={files.length === 0}
 						class="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 					>

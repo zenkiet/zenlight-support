@@ -19,13 +19,37 @@ const (
 func defaultConfig(appVer string) domain.Config {
 	return domain.Config{
 		Version: strings.TrimSpace(appVer),
-		Services: []domain.ServiceConfig{
+		Resources: []domain.ResourceConfig{
 			{
 				ID:          uuid.NewString(),
-				Name:        "Report Service",
-				Description: "Generates and manages reports for Blogic applications.",
+				Name:        "Blogic Report Service",
+				Description: "Generates and manages reports for Blogic View",
+				Type:        domain.ServiceType,
 				ServiceName: "BlogicReportService",
-				Path:        "C:\\Program Files (x86)\\BLogic Systems\\BLogic Service\\BLogicReportService",
+				Installable: true,
+			},
+			{
+				ID:          uuid.NewString(),
+				Name:        "POS Server",
+				Description: "Point of Sale server for Blogic",
+				Type:        domain.DirectoryType,
+				Path:        "C:\\inetpub\\wwwroot\\BLogicService\\bin",
+				Installable: true,
+			},
+			{
+				ID:          uuid.NewString(),
+				Name:        "Kiosk Web",
+				Description: "Sources static files for Blogic Kiosk Web application.",
+				Type:        domain.DirectoryType,
+				Path:        "C:\\Program Files (x86)\\BLogic Systems\\BLogicKioskWeb",
+				Installable: true,
+			},
+			{
+				ID:          uuid.NewString(),
+				Name:        "BlogicViewTaskScheduleHandler",
+				Description: "Schedule send report for Blogic View",
+				Type:        domain.DirectoryType,
+				Path:        "C:\\Program Files (x86)\\BLogic Systems\\BLogic Service\\BLogicViewTaskScheduleHandler",
 				Installable: true,
 			},
 		},

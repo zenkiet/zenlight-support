@@ -1,19 +1,29 @@
 <script lang="ts">
 	import ServiceList from '$lib/components/ServiceList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import { serviceStore } from '$lib/stores/services.svelte';
+	import { ServiceStatus } from '$lib/enums/service-status.enum';
+	import { resourceStore } from '$lib/stores/resources.svelte';
+
+	const runningCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.RUNNING).length);
+	const stoppedCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.STOPPED).length);
 
 	let searchQuery = $state('');
 </script>
 
 <header class="flex shrink-0 flex-col gap-5 pt-2 mb-6">
 	<div class="flex items-center justify-between">
-		<div class="flex items-center gap-4">
-			<h1 class="text-2xl font-bold tracking-tight">Services Management</h1>
-			<div class="flex items-center gap-2 border-l border-muted/20 pl-4">
-				<Badge label="Running" type="success" count={serviceStore.runningCount} />
-				<Badge label="Stopped" type="danger" count={serviceStore.stoppedCount} />
+		<div class="flex flex-col gap-1">
+			<div class="flex items-center gap-4">
+				<h1 class="text-2xl font-bold tracking-tight">Services Management</h1>
+				<div class="flex items-center gap-2 border-l border-muted/20 pl-4">
+				<Badge label="Running" type="success" count={runningCount} />
+				<Badge label="Stopped" type="danger" count={stoppedCount} />
 			</div>
+			</div>
+			<span class="text-sm text-muted">
+				Manage your monitored services registered in ZenB Tool
+			</span>
+
 		</div>
 	</div>
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,22 +18,22 @@ import (
 type App struct {
 	Ctx     context.Context
 	cfg     domain.Config
-	mgr     domain.ServiceManager
-	svcMap  map[string]domain.ServiceConfig
+	mgr     domain.ResourceManager
+	itemMap map[string]domain.ResourceConfig
 	watcher *ServiceWatcher
 	appVer  string
 }
 
-func NewApp(cfg domain.Config, mgr domain.ServiceManager, appVer string) *App {
-	sMap := make(map[string]domain.ServiceConfig)
-	for _, svc := range cfg.Services {
-		sMap[svc.ID] = svc
+func NewApp(cfg domain.Config, mgr domain.ResourceManager, appVer string) *App {
+	itemMap := make(map[string]domain.ResourceConfig)
+	for _, item := range cfg.Resources {
+		itemMap[item.ID] = item
 	}
 
 	return &App{
 		cfg:     cfg,
 		mgr:     mgr,
-		svcMap:  sMap,
+		itemMap: itemMap,
 		watcher: NewServiceWatcher(cfg, mgr),
 		appVer:  appVer,
 	}
@@ -64,12 +65,26 @@ func (a *App) Shutdown(ctx context.Context) {
 	a.mgr.Disconnect()
 }
 
-func (a *App) GetConfig() domain.Config {
-	return a.cfg
+func (a *App) GetServices() []domain.ResourceConfig {
+	return a.filterByType(domain.ServiceType)
+}
+
+func (a *App) GetDirectories() []domain.ResourceConfig {
+	return a.filterByType(domain.DirectoryType)
+}
+
+func (a *App) filterByType(rType domain.ResourceType) []domain.ResourceConfig {
+	var result []domain.ResourceConfig
+	for _, item := range a.cfg.Resources {
+		if item.Type == rType {
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 func (a *App) StartService(id string) error {
-	cfg, ok := a.svcMap[id]
+	cfg, ok := a.itemMap[id]
 	if !ok {
 		return fmt.Errorf("service config not found for ID: %s", id)
 	}
@@ -77,31 +92,38 @@ func (a *App) StartService(id string) error {
 }
 
 func (a *App) StopService(id string) error {
-	cfg, ok := a.svcMap[id]
+	cfg, ok := a.itemMap[id]
 	if !ok {
 		return fmt.Errorf("service config not found for ID: %s", id)
+	}
+	if cfg.Type != domain.ServiceType {
+		return fmt.Errorf("resource is not a service: %s", id)
 	}
 	return a.mgr.StopService(cfg.ServiceName)
 }
 
 func (a *App) GetServiceStatus(id string) (domain.Status, error) {
-	cfg, ok := a.svcMap[id]
+	cfg, ok := a.itemMap[id]
 	if !ok {
 		return domain.STOPPED, fmt.Errorf("service config not found for ID: %s", id)
 	}
-	return a.mgr.GetServiceState(cfg.ServiceName)
+	if cfg.Type != domain.ServiceType {
+		return domain.STOPPED, fmt.Errorf("resource is not a service: %s", id)
+	}
+
+	return a.mgr.GetResourceState(cfg.ServiceName)
 }
 
 func (a *App) OpenExplorer(id string) error {
-	cfg, ok := a.svcMap[id]
+	cfg, ok := a.itemMap[id]
 	if !ok {
-		return fmt.Errorf("service config not found for ID: %s", id)
+		return fmt.Errorf("resource config not found for ID: %s", id)
 	}
 
 	targetPath := filepath.Clean(os.ExpandEnv(cfg.Path))
 	info, err := os.Stat(targetPath)
 	if err != nil {
-		return fmt.Errorf("service path error: %w", err)
+		return fmt.Errorf("resource path error: %w", err)
 	}
 
 	var cmd *exec.Cmd
@@ -125,10 +147,13 @@ func (a *App) OpenExplorer(id string) error {
 	return cmd.Start()
 }
 
-func (a *App) InstallService(id string, files []domain.InstallFileDTO) error {
-	cfg, ok := a.svcMap[id]
+func (a *App) Install(id string, files []domain.InstallFileDTO) error {
+	cfg, ok := a.itemMap[id]
 	if !ok {
 		return fmt.Errorf("service config not found for ID: %s", id)
+	}
+	if cfg.Type != domain.ServiceType {
+		return fmt.Errorf("resource is not a service: %s", id)
 	}
 
 	serviceName := cfg.ServiceName
@@ -163,7 +188,7 @@ func (a *App) InstallService(id string, files []domain.InstallFileDTO) error {
 }
 
 func (a *App) startAndWait(serviceName string) error {
-	state, err := a.mgr.GetServiceState(serviceName)
+	state, err := a.mgr.GetResourceState(serviceName)
 	if err != nil {
 		return err
 	}
@@ -185,7 +210,7 @@ func (a *App) startAndWait(serviceName string) error {
 		case <-timeout:
 			return fmt.Errorf("timeout waiting for service to start: %s", serviceName)
 		case <-ticker.C:
-			currentState, err := a.mgr.GetServiceState(serviceName)
+			currentState, err := a.mgr.GetResourceState(serviceName)
 			if err != nil {
 				continue
 			}
@@ -197,7 +222,7 @@ func (a *App) startAndWait(serviceName string) error {
 }
 
 func (a *App) stopAndWait(serviceName string) error {
-	state, err := a.mgr.GetServiceState(serviceName)
+	state, err := a.mgr.GetResourceState(serviceName)
 	if err != nil {
 		return err
 	}
@@ -219,7 +244,7 @@ func (a *App) stopAndWait(serviceName string) error {
 		case <-timeout:
 			return fmt.Errorf("timeout waiting for service to stop: %s", serviceName)
 		case <-ticker.C:
-			currentState, err := a.mgr.GetServiceState(serviceName)
+			currentState, err := a.mgr.GetResourceState(serviceName)
 			if err != nil {
 				continue
 			}
@@ -228,5 +253,21 @@ func (a *App) stopAndWait(serviceName string) error {
 			}
 		}
 	}
+}
 
+func (a *App) GetResourceMetrics(id string) (*domain.ResourceMetrics, error) {
+	cfg, ok := a.itemMap[id]
+	if !ok {
+		return nil, fmt.Errorf("service config not found for ID: %s", id)
+	}
+
+	if cfg.Type == domain.ServiceType {
+		return a.mgr.GetServiceMetrics(cfg.ServiceName)
+	}
+
+	if cfg.Type == domain.DirectoryType {
+		return a.mgr.GetDirectoryMetrics(cfg.Path)
+	}
+
+	return nil, fmt.Errorf("unsupported resource type for metrics: %s", id)
 }

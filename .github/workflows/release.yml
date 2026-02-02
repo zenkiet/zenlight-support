@@ -53,8 +53,7 @@ jobs:
       - name: Build Windows Binary
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          VERSION: ${{ github.ref_name }}
-        run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'window-service-watcher/internal/app.Version=${{ github.ref_name }}' -X 'window-service-watcher/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
+        run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'window-service-watcher/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
