@@ -12,7 +12,7 @@
 			title: 'Features',
 			items: [
 				{ name: 'Services', icon: 'icon-[regular--server]', href: '/' },
-				{ name: 'Projects', icon: 'icon-[regular--diagram-project]', href: '/statics' },
+				{ name: 'Projects', icon: 'icon-[regular--diagram-project]', href: '/projects' },
 				{ name: 'Run Script', icon: 'icon-[regular--code]', href: '/script' }
 			]
 		},

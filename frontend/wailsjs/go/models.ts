@@ -29,58 +29,6 @@ export namespace app {
 
 export namespace domain {
 	
-	export class ServiceConfig {
-	    id: string;
-	    name: string;
-	    description: string;
-	    serviceName: string;
-	    path: string;
-	    installable: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new ServiceConfig(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.description = source["description"];
-	        this.serviceName = source["serviceName"];
-	        this.path = source["path"];
-	        this.installable = source["installable"];
-	    }
-	}
-	export class Config {
-	    services: ServiceConfig[];
-	
-	    static createFrom(source: any = {}) {
-	        return new Config(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.services = this.convertValues(source["services"], ServiceConfig);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
 	export class InstallFileDTO {
 	    name: string;
 	    data: number[];
@@ -93,6 +41,52 @@ export namespace domain {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.data = source["data"];
+	    }
+	}
+	export class ResourceConfig {
+	    id: string;
+	    name: string;
+	    description: string;
+	    type: string;
+	    path: string;
+	    installable: boolean;
+	    serviceName?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ResourceConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.type = source["type"];
+	        this.path = source["path"];
+	        this.installable = source["installable"];
+	        this.serviceName = source["serviceName"];
+	    }
+	}
+	export class ResourceMetrics {
+	    pid: number;
+	    createTime: number;
+	    cpu: number;
+	    mem: number;
+	    totalSize?: number;
+	    lastModified?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ResourceMetrics(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pid = source["pid"];
+	        this.createTime = source["createTime"];
+	        this.cpu = source["cpu"];
+	        this.mem = source["mem"];
+	        this.totalSize = source["totalSize"];
+	        this.lastModified = source["lastModified"];
 	    }
 	}
 

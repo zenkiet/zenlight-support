@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { serviceStore } from '$lib/stores/services.svelte';
+	import { resourceStore } from '$lib/stores/resources.svelte';
 	import AddService from './AddService.svelte';
 	import ServiceCard from './ServiceCard.svelte';
 	import { fade } from 'svelte/transition';
@@ -9,10 +9,10 @@
 	}>();
 
 	const filteredServices = $derived.by(() =>
-		serviceStore.services.filter(
+		resourceStore.services.filter(
 			(service) =>
-				service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				service.config?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				service.config?.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
 				service.metrics?.pid?.toString().includes(searchQuery)
 		)
 	);
@@ -32,7 +32,7 @@
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-    {#each filteredServices as service (service.id)}
+    {#each filteredServices as service (service.config?.id)}
         <div in:fade={{ duration: 200 }}>
             <ServiceCard {service} />
         </div>

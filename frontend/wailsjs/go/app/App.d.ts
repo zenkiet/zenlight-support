@@ -7,11 +7,15 @@ export function CheckUpdate():Promise<app.UpdateInfo>;
 
 export function DoUpdate(arg1:string):Promise<void>;
 
-export function GetConfig():Promise<domain.Config>;
+export function GetDirectories():Promise<Array<domain.ResourceConfig>>;
+
+export function GetResourceMetrics(arg1:string):Promise<domain.ResourceMetrics>;
 
 export function GetServiceStatus(arg1:string):Promise<domain.Status>;
 
-export function InstallService(arg1:string,arg2:Array<domain.InstallFileDTO>):Promise<void>;
+export function GetServices():Promise<Array<domain.ResourceConfig>>;
+
+export function Install(arg1:string,arg2:Array<domain.InstallFileDTO>):Promise<void>;
 
 export function OpenExplorer(arg1:string):Promise<void>;
 

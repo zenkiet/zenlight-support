@@ -19,25 +19,32 @@ type InstallFileDTO struct {
 	Data []byte `json:"data"`
 }
 
-type ServiceMetrics struct {
+type ResourceMetrics struct {
+	// --- Service ---
 	PID        uint32  `json:"pid"`
 	CreateTime int64   `json:"createTime"`
 	CPUUsage   float64 `json:"cpu"`
 	MemUsage   uint64  `json:"mem"`
+
+	// --- Directory ---
+	TotalSize int64 `json:"totalSize,omitempty"`
+	// FileCount    int   `json:"fileCount,omitempty"`
+	LastModified int64 `json:"lastModified,omitempty"`
 }
 
-type ServiceStatus struct {
-	ID      string          `json:"id"`
-	Status  Status          `json:"status"`
-	Metrics *ServiceMetrics `json:"metrics,omitempty"`
+type ResourceStatus struct {
+	ID      string           `json:"id"`
+	Status  Status           `json:"status"`
+	Metrics *ResourceMetrics `json:"metrics,omitempty"`
 }
 
-type ServiceManager interface {
+type ResourceManager interface {
 	Connect() error
 	Disconnect() error
 
-	GetServiceState(serviceName string) (Status, error)
-	GetServiceMetrics(serviceName string) (*ServiceMetrics, error)
+	GetResourceState(resourceName string) (Status, error)
+	GetServiceMetrics(resourceName string) (*ResourceMetrics, error)
+	GetDirectoryMetrics(path string) (*ResourceMetrics, error)
 
 	StartService(serviceName string) error
 	StopService(serviceName string) error

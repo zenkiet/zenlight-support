@@ -3,21 +3,42 @@ import {
 	StartService,
 	StopService,
 	GetServices,
-	InstallService,
-	OpenExplorer
+	OpenExplorer,
+	GetDirectories,
+	Install,
+	GetResourceMetrics
 } from '../../../wailsjs/go/app/App';
 import type { domain } from '../../../wailsjs/go/models';
 import { safeCall } from '$lib/utils/result';
 
 export const WailsBridge = {
-	openUrl: (url: string) => BrowserOpenURL(url),
-	quit: () => Quit(),
-	minimize: () => WindowMinimise(),
-	service: {
-		get: () => safeCall(GetServices()),
-		start: (id: string) => safeCall(StartService(id)),
-		stop: (id: string) => safeCall(StopService(id)),
-		install: (id: string, files: domain.InstallFileDTO[]) => safeCall(InstallService(id, files)),
-		openExplorer: (id: string) => safeCall(OpenExplorer(id))
-	}
+		quit: () => Quit(),
+		openURL: (url: string) => BrowserOpenURL(url),
+		minimiseWindow: () => WindowMinimise(),
+		GetResourceMetrics: (resourceName: string) => safeCall(GetResourceMetrics(resourceName)),
+    openExplorer: (id: string) => safeCall(OpenExplorer(id)),
+    startService: (id: string) => safeCall(StartService(id)),
+    stopService: (id: string) => safeCall(StopService(id)),
+    installService: (id: string, files: domain.InstallFileDTO[]) => safeCall(Install(id, files)),
+    fetchServices: () => safeCall(GetServices()),
+    fetchDirectories: () => safeCall(GetDirectories()),
 };
+
+export const bridge = {
+	quit: WailsBridge.quit,
+	openURL: WailsBridge.openURL,
+	minimiseWindow: WailsBridge.minimiseWindow,
+	service: {
+		get: WailsBridge.fetchServices,
+		start: WailsBridge.startService,
+		stop: WailsBridge.stopService,
+	},
+	directory: {
+		get: WailsBridge.fetchDirectories,
+	},
+	openExplorer: WailsBridge.openExplorer,
+	install: WailsBridge.installService,
+	metrics: WailsBridge.GetResourceMetrics,
+}
+
+
