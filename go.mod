@@ -8,7 +8,7 @@ require (
 	github.com/minio/selfupdate v0.6.0
 	github.com/shirou/gopsutil/v4 v4.25.12
 	github.com/wailsapp/wails/v2 v2.11.0
-	go.yaml.in/yaml/v4 v4.0.0-rc.4
+	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/sys v0.40.0
 )
 

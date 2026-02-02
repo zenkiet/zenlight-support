@@ -10,5 +10,6 @@ type ServiceConfig struct {
 }
 
 type Config struct {
+	Version  string          `json:"version" yaml:"version"`
 	Services []ServiceConfig `json:"services" yaml:"services"`
 }

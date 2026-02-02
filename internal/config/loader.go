@@ -4,20 +4,25 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"window-service-watcher/internal/domain"
+	"window-service-watcher/internal/repository"
 
 	"github.com/google/uuid"
-	"go.yaml.in/yaml/v4"
+	"github.com/hashicorp/go-version"
 )
 
-const fileName = "config.yaml"
+const (
+	fileName = "config.yaml"
+)
 
-func DefaultConfig() domain.Config {
+func defaultConfig(appVer string) domain.Config {
 	return domain.Config{
+		Version: strings.TrimSpace(appVer),
 		Services: []domain.ServiceConfig{
 			{
-				ID:          uuid.New().String(),
-				Name:        "Blogic Report Service",
+				ID:          uuid.NewString(),
+				Name:        "Report Service",
 				Description: "Generates and manages reports for Blogic applications.",
 				ServiceName: "BlogicReportService",
 				Path:        "C:\\Program Files (x86)\\BLogic Systems\\BLogic Service\\BLogicReportService",
@@ -27,46 +32,70 @@ func DefaultConfig() domain.Config {
 	}
 }
 
-func LoadConfig() (*domain.Config, error) {
+func LoadConfig(appVer string) (*domain.Config, error) {
 	exePath, err := os.Executable()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get executable path: %w", err)
 	}
 	exeDir := filepath.Dir(exePath)
 	configPath := filepath.Join(exeDir, fileName)
+	repo := repository.NewYamlConfigRepository(configPath)
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		return createConfig(configPath)
-	}
-
-	return loadConfig(configPath)
+	return ensureConfig(repo, appVer)
 }
 
-func createConfig(path string) (*domain.Config, error) {
-	cfg := DefaultConfig()
+func ensureConfig(repo *repository.YamlConfigRepository, appVer string) (*domain.Config, error) {
+	cfg, err := repo.Load()
 
-	data, err := yaml.Marshal(&cfg)
+	if os.IsNotExist(err) {
+		newCfg := defaultConfig(appVer)
+		if err := repo.Save(&newCfg); err != nil {
+			return nil, fmt.Errorf("failed to create default config: %w", err)
+		}
+		return &newCfg, nil
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal default config: %w", err)
+		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	if err := os.WriteFile(path, data, 0644); err != nil {
-		return nil, fmt.Errorf("failed to write default config file: %w", err)
+	isOutdated, err := checkIsOutdated(cfg.Version, appVer)
+	if err != nil {
+		return nil, fmt.Errorf("failed to compare config versions: %w", err)
+	}
+	if isOutdated {
+		if err := backupConfigFile(repo.Path, cfg.Version); err != nil {
+			return nil, fmt.Errorf("failed to backup old config file: %w", err)
+		}
+		newCfg := defaultConfig(appVer)
+		if err := repo.Save(&newCfg); err != nil {
+			return nil, fmt.Errorf("failed to save new config: %w", err)
+		}
+		return &newCfg, nil
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }
 
-func loadConfig(path string) (*domain.Config, error) {
-	data, err := os.ReadFile(path)
+func checkIsOutdated(currentVerStr, appVerStr string) (bool, error) {
+	if currentVerStr == "" {
+		return true, nil
+	}
+
+	vCurrent, err := version.NewVersion(strings.TrimSpace(currentVerStr))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		return false, err
 	}
 
-	var cfg domain.Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	vApp, err := version.NewVersion(strings.TrimSpace(appVerStr))
+	if err != nil {
+		return false, err
 	}
 
-	return &cfg, nil
+	return vApp.GreaterThan(vCurrent), nil
+}
+
+func backupConfigFile(path string, oldVer string) error {
+	backupPath := fmt.Sprintf("%s.%s.bak", path, oldVer)
+	return os.Rename(path, backupPath)
 }

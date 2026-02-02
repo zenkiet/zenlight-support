@@ -15,7 +15,6 @@ import (
 	"github.com/minio/selfupdate"
 )
 
-var Version = "v1.0.0"
 var GH_TOKEN = "" // replace with your GitHub token
 
 const RepoURL = "https://api.github.com/repos/zenkiet/window-service-watcher/releases/latest"
@@ -70,14 +69,14 @@ func (a *App) CheckUpdate() UpdateInfo {
 
 	fmt.Println("Checking for updates...")
 
-	current, _ := version.NewVersion(Version)
+	current, _ := version.NewVersion(a.appVer)
 	latest, err := version.NewVersion(release.TagName)
 	if err != nil {
 		return errorUpdateInfo(fmt.Errorf("invalid tag format in release: %s", release.TagName))
 	}
 
 	if latest.LessThanOrEqual(current) {
-		return UpdateInfo{Available: false, CurrentVer: Version, LatestVer: release.TagName, Build: release.CreatedAt}
+		return UpdateInfo{Available: false, CurrentVer: a.appVer, LatestVer: release.TagName, Build: release.CreatedAt}
 	}
 
 	downloadURL := findAsset(release.Assets)
@@ -87,7 +86,7 @@ func (a *App) CheckUpdate() UpdateInfo {
 
 	return UpdateInfo{
 		Available:    true,
-		CurrentVer:   Version,
+		CurrentVer:   a.appVer,
 		Build:        release.CreatedAt,
 		LatestVer:    release.TagName,
 		ReleaseNotes: release.Body,
@@ -121,7 +120,7 @@ func (a *App) RestartApp() {
 }
 
 func errorUpdateInfo(err error) UpdateInfo {
-	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: Version}
+	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: "v0.0.0"}
 }
 
 func findAsset(assets []asset) string {

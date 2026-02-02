@@ -20,9 +20,10 @@ type App struct {
 	mgr     domain.ServiceManager
 	svcMap  map[string]domain.ServiceConfig
 	watcher *ServiceWatcher
+	appVer  string
 }
 
-func NewApp(cfg domain.Config, mgr domain.ServiceManager) *App {
+func NewApp(cfg domain.Config, mgr domain.ServiceManager, appVer string) *App {
 	sMap := make(map[string]domain.ServiceConfig)
 	for _, svc := range cfg.Services {
 		sMap[svc.ID] = svc
@@ -33,6 +34,7 @@ func NewApp(cfg domain.Config, mgr domain.ServiceManager) *App {
 		mgr:     mgr,
 		svcMap:  sMap,
 		watcher: NewServiceWatcher(cfg, mgr),
+		appVer:  appVer,
 	}
 }
 
