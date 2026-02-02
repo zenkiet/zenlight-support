@@ -35,7 +35,7 @@
 </script>
 
 <div
-	class="relative inline-flex"
+	class="relative inline-grid"
 	role="tooltip"
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -52,12 +52,12 @@
 			out:fade={{ duration: 150 }}
 		>
 			<div
-				class="relative flex items-center justify-center rounded-lg border border-white/10 bg-neutral-900/90 font-mono text-xs font-medium"
+				class="relative flex items-center justify-center rounded-lg border border-muted/10 bg-surface font-mono text-xs font-medium"
 			>
 				<span class="px-2 py-1">{content}</span>
 
 				<div
-					class="absolute left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-white/10 bg-neutral-900/90"
+					class="absolute left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-muted/10 bg-surface"
 					class:border-r={position === 'top'}
 					class:border-b={position === 'top'}
 					class:border-l={position === 'bottom'}
