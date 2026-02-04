@@ -4,11 +4,17 @@ package service
 
 import (
 	"window-service-watcher/internal/domain"
+	"window-service-watcher/pkg/sql"
 )
 
 type MockManager struct {
 	// logCancel context.CancelFunc
 	// logMutex  sync.Mutex
+}
+
+// ExecuteSQLScript implements [domain.ResourceManager].
+func (m *MockManager) ExecuteSQLScript(server string, database string, script string) (*sql.Result, error) {
+	panic("unimplemented")
 }
 
 // GetDirectoryMetrics implements [domain.ResourceManager].

@@ -1,5 +1,7 @@
 package domain
 
+import "window-service-watcher/pkg/sql"
+
 type Status int8
 
 // don't care other states
@@ -15,8 +17,9 @@ const (
 )
 
 type InstallFileDTO struct {
-	Name string `json:"name"`
-	Data []byte `json:"data"`
+	Name      string `json:"name"`
+	Data      []byte `json:"data"`
+	Extension string `json:"extension"`
 }
 
 type ResourceMetrics struct {
@@ -48,6 +51,8 @@ type ResourceManager interface {
 
 	StartService(serviceName string) error
 	StopService(serviceName string) error
+
+	ExecuteSQLScript(server, database, script string) (*sql.Result, error)
 
 	// StartLogWatcher(filePath string, onLog func(string), onError func(error))
 	// StopLogWatcher()

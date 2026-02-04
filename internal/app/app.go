@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"window-service-watcher/internal/domain"
+	"window-service-watcher/pkg/sql"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -152,9 +153,6 @@ func (a *App) Install(id string, files []domain.InstallFileDTO) error {
 	if !ok {
 		return fmt.Errorf("service config not found for ID: %s", id)
 	}
-	if cfg.Type != domain.ServiceType {
-		return fmt.Errorf("resource is not a service: %s", id)
-	}
 
 	serviceName := cfg.ServiceName
 	targetPath := filepath.Clean(os.ExpandEnv(cfg.Path))
@@ -162,8 +160,10 @@ func (a *App) Install(id string, files []domain.InstallFileDTO) error {
 	wailsRuntime.LogInfo(a.Ctx, "Installing service files to: "+targetPath)
 
 	// Stop service if running
-	if err := a.stopAndWait(serviceName); err != nil {
-		return fmt.Errorf("failed to stop service: %w", err)
+	if cfg.Type == domain.ServiceType {
+		if err := a.stopAndWait(serviceName); err != nil {
+			return fmt.Errorf("failed to stop service: %w", err)
+		}
 	}
 
 	if err := os.MkdirAll(targetPath, 0755); err != nil {
@@ -181,9 +181,12 @@ func (a *App) Install(id string, files []domain.InstallFileDTO) error {
 	wailsRuntime.LogInfo(a.Ctx, "Service files installed for: "+serviceName)
 
 	// Start service after installation
-	if err := a.startAndWait(serviceName); err != nil {
-		return fmt.Errorf("failed to start service: %w", err)
+	if cfg.Type == domain.ServiceType {
+		if err := a.startAndWait(serviceName); err != nil {
+			return fmt.Errorf("failed to start service: %w", err)
+		}
 	}
+
 	return nil
 }
 
@@ -270,4 +273,12 @@ func (a *App) GetResourceMetrics(id string) (*domain.ResourceMetrics, error) {
 	}
 
 	return nil, fmt.Errorf("unsupported resource type for metrics: %s", id)
+}
+
+func (a *App) GetSqlConfig() (*domain.SQLConfig, error) {
+	return a.cfg.SQLConfig, nil
+}
+
+func (a *App) ExecuteSQLScript(id string, script string) (*sql.Result, error) {
+	return a.mgr.ExecuteSQLScript(a.cfg.SQLConfig.Server, a.cfg.SQLConfig.Database, script)
 }

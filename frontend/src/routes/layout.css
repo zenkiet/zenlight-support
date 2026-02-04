@@ -75,12 +75,12 @@
 			radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
 			radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
 			radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
-		--wails-draggable: drag;
 	}
 
 	/* Scrollbar */
 	.scrollable::-webkit-scrollbar {
 		width: 8px;
+		height: 8px;
 	}
 
 	.scrollable::-webkit-scrollbar-track {

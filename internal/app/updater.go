@@ -79,7 +79,7 @@ func (a *App) CheckUpdate() UpdateInfo {
 		return UpdateInfo{Available: false, CurrentVer: a.appVer, LatestVer: release.TagName, Build: release.CreatedAt}
 	}
 
-	downloadURL := findAsset(release.Assets)
+	downloadURL := findAsset(release.Assets, "service-watcher.exe")
 	if downloadURL == "" {
 		return errorUpdateInfo(fmt.Errorf("no suitable asset found for download"))
 	}
@@ -123,12 +123,15 @@ func errorUpdateInfo(err error) UpdateInfo {
 	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: "v0.0.0"}
 }
 
-func findAsset(assets []asset) string {
+func findAsset(assets []asset, appName string) string {
 	targetExt := ".exe"
 	targetArch := runtime.GOARCH
 
 	for _, asset := range assets {
 		name := strings.ToLower(asset.Name)
+		if !strings.Contains(name, strings.ToLower(appName)) {
+			continue
+		}
 		if !strings.HasSuffix(name, targetExt) {
 			continue
 		}

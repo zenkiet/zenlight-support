@@ -3,6 +3,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"time"
 	"unsafe"
 	"window-service-watcher/internal/domain"
+	"window-service-watcher/pkg/sql"
 
 	"github.com/shirou/gopsutil/v4/process"
 	"golang.org/x/sys/windows"
@@ -26,6 +28,12 @@ type WindowsManager struct {
 	mgr          *mgr.Mgr
 	mu           sync.RWMutex
 	processCache map[string]*processHandle
+}
+
+// ExecuteSQLScript implements [domain.ResourceManager].
+func (w *WindowsManager) ExecuteSQLScript(server string, database string, script string) (*sql.Result, error) {
+	executor := sql.NewExecutor(server, database)
+	return executor.Execute(context.Background(), script)
 }
 
 // GetDirectoryMetrics implements [domain.ResourceManager].

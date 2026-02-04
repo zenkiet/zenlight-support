@@ -32,6 +32,7 @@ export namespace domain {
 	export class InstallFileDTO {
 	    name: string;
 	    data: number[];
+	    extension: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new InstallFileDTO(source);
@@ -41,6 +42,7 @@ export namespace domain {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.data = source["data"];
+	        this.extension = source["extension"];
 	    }
 	}
 	export class ResourceConfig {
@@ -87,6 +89,51 @@ export namespace domain {
 	        this.mem = source["mem"];
 	        this.totalSize = source["totalSize"];
 	        this.lastModified = source["lastModified"];
+	    }
+	}
+	export class SQLConfig {
+	    id: string;
+	    name: string;
+	    description: string;
+	    server: string;
+	    database: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.server = source["server"];
+	        this.database = source["database"];
+	    }
+	}
+
+}
+
+export namespace sql {
+	
+	export class Result {
+	    rowsAffected: number;
+	    lastInsertId: number;
+	    columns?: string[];
+	    data?: any[][];
+	    executionTime?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Result(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rowsAffected = source["rowsAffected"];
+	        this.lastInsertId = source["lastInsertId"];
+	        this.columns = source["columns"];
+	        this.data = source["data"];
+	        this.executionTime = source["executionTime"];
 	    }
 	}
 
