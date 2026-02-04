@@ -97,6 +97,8 @@ export class Resource {
 		if (!result.success) {
 			console.error(`Failed to install ${this.config!.name}:`, result.error);
 			throw result.error;
+		} else {
+			await this.getMetrics();
 		}
 	}
 

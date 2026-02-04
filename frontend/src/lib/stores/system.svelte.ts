@@ -9,6 +9,7 @@ export interface Setting {
 }
 
 export class SystemStore {
+	isDark = $state(true);
 	setting = $state<Setting>({
 		runBackground: false,
 		notifications: false,
@@ -24,6 +25,16 @@ export class SystemStore {
 		releaseNotes: '',
 		downloadUrl: ''
 	});
+
+	constructor() {
+		const saved = localStorage.getItem('theme');
+		if (saved) {
+			this.isDark = saved === 'dark';
+		} else {
+			this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		}
+		this.applyTheme();
+	}
 
 	async init() {
 		if (this.initialized) return;
@@ -45,6 +56,21 @@ export class SystemStore {
 		if (!url) return;
 
 		await DoUpdate(url);
+	}
+
+	toggleTheme() {
+		this.isDark = !this.isDark;
+		this.applyTheme();
+	}
+
+	applyTheme() {
+		if (this.isDark) {
+			document.documentElement.setAttribute('data-theme', 'dark');
+			localStorage.setItem('theme', 'dark');
+		} else {
+			document.documentElement.setAttribute('data-theme', 'light');
+			localStorage.setItem('theme', 'light');
+		}
 	}
 }
 

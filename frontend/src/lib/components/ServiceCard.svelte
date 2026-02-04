@@ -14,7 +14,8 @@
 			const data = await readFileAsBytes(file);
 			return {
 				name: file.name,
-				data
+				data,
+				extension: file.name.split('.').pop() || ''
 			};
 		});
 		await service.install(await Promise.all(payload));

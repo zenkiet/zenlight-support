@@ -53,6 +53,13 @@ func defaultConfig(appVer string) domain.Config {
 				Installable: true,
 			},
 		},
+		SQLConfig: &domain.SQLConfig{
+			ID:          uuid.NewString(),
+			Name:        "SQL SERVER for BLOGIC POS",
+			Description: "Database server for Blogic POS",
+			Server:      "localhost",
+			Database:    "BlogicPOS7",
+		},
 	}
 }
 

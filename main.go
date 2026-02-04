@@ -65,7 +65,7 @@ func main() {
 	// Create application with options
 	errApp := wails.Run(&options.App{
 		Title:     "Zen Service Watcher",
-		MinWidth:  500,
+		MinWidth:  700,
 		MinHeight: 800,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

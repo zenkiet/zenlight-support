@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatDate, formatRelativeTime, readFileAsBytes } from '$lib/helpers';
+	import { formatDate, formatFullDateTime, formatRelativeTime, readFileAsBytes } from '$lib/helpers';
 	import type { Resource } from '$lib/stores/resources.svelte';
 	import InstallModal from './modals/InstallModal.svelte';
 
@@ -7,10 +7,10 @@
 
 	let showInstallModal = $state(false);
 
-	const lastModifiedLabel = $derived(
-		project.metrics.lastModified ? formatRelativeTime(project.metrics.lastModified) : '--'
-	);
-	const totalSizeLabel = $derived(
+	const dateModified = $derived(
+		project.metrics.lastModified ? formatFullDateTime(project.metrics.lastModified) : '--'
+	)
+	const totalSize = $derived(
 		project.metrics.totalSize ? `${(project.metrics.totalSize / 1024 / 1024).toFixed(1)} MB` : '--'
 	);
 
@@ -67,8 +67,8 @@
 	<div
 		class="grid grid-cols-2 overflow-hidden rounded-b-lg border-t border-muted/10 text-center text-xs font-medium"
 	>
-		{@render metric('LAST MODIFIED', lastModifiedLabel, 'text-blue-600 dark:text-blue-300')}
-		{@render metric('TOTAL SIZE', totalSizeLabel, 'text-emerald-600 dark:text-emerald-300')}
+		{@render metric('Date Modified', dateModified, 'text-blue-600 dark:text-blue-300')}
+		{@render metric('Total Size', totalSize, 'text-emerald-600 dark:text-emerald-300')}
 	</div>
 </div>
 
