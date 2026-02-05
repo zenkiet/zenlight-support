@@ -26,6 +26,7 @@ func defaultConfig(appVer string) domain.Config {
 				Description: "Generates and manages reports for Blogic View",
 				Type:        domain.ServiceType,
 				ServiceName: "BlogicReportService",
+				Path:        "C:\\Program Files (x86)\\BLogic Systems\\BLogic Service\\BLogicReportService",
 				Installable: true,
 			},
 			{
