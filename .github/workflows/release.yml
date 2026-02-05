@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
+          go-version: '1.25.7'
 
       - uses: actions/setup-node@v6
         with:
@@ -54,6 +54,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'zenlight-support/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
+
+      - name: Code sign Windows binaries
+        uses: dlemstra/code-sign-action@v1
+        with:
+          certificate: '${{ secrets.CERTIFICATE }}'
+          password: '${{ secrets.PASSWORD }}'
+          folder: 'build/bin'
+          recursive: false
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

@@ -1,16 +1,17 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/zenkiet/window-service-watcher/refs/heads/main/frontend/src/icons/logo.png" width="250" height="250" alt="App Logo">
+<img src="https://raw.githubusercontent.com/zenkiet/zenlight-support/refs/heads/main/frontend/src/icons/logo.png" width="250" height="250" alt="App Logo">
 
-<h1>Window Service Watcher</h1>
+<h1>ZenLight Support</h1>
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.25.7-00ADD8?style=flat-square&logo=go)](https://go.dev/)
 [![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?style=flat-square&logo=svelte)](https://svelte.dev/)
-[![Wails](https://img.shields.io/badge/Wails-2.9-E3202E?style=flat-square&logo=wails)](https://wails.io/)
-[![License](https://img.shields.io/github/license/zenkiet/window-service-watcher?style=flat-square)](LICENSE)
+[![Wails](https://img.shields.io/badge/Wails-2.11.0-E3202E?style=flat-square&logo=wails)](https://wails.io/)
+[![License](https://img.shields.io/github/license/zenkiet/zenlight-support?style=flat-square)](LICENSE)
 
-**A lightweight, modern desktop application for real-time monitoring and management of Windows services.**
-
+**"More than a watcher, it’s a state of mind."**
+<br>
+**A feather-light, Zen-driven dashboard that brings clarity to chaos and total mastery to Windows services.**
 
 </div>
 
@@ -58,7 +59,7 @@ Built on the **Clean Architecture** principle, ensuring separation of concerns a
 - **Bridge**: Async communication via Wails runtime events (`services-update`).
 
 ```bash
-window-service-watcher/
+zenlight-support/
 ├── internal/
 │   ├── app/        # App lifecycle & Watcher logic
 │   ├── config/     # Config loader (YAML)
@@ -82,8 +83,8 @@ window-service-watcher/
 
 1.  **Clone & Install Dependencies**
     ```bash
-    git clone https://github.com/zenkiet/window-service-watcher.git
-    cd window-service-watcher
+    git clone https://github.com/zenkiet/zenlight-support.git
+    cd zenlight-support
 
     # Install backend & frontend deps
     make deps
@@ -98,7 +99,7 @@ window-service-watcher/
 3.  **Build for Production**
     ```bash
     wails build
-    # Output: ./build/bin/window-service-watcher.exe
+    # Output: ./build/bin/zenlight-support.exe
     ```
 
 ---

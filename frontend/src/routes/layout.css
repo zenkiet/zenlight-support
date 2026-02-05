@@ -11,13 +11,13 @@
 	/* Fonts */
 	--font-sans: 'Inter', system-ui, sans-serif;
 	--font-quicksand: "Quicksand", sans-serif;
-	--font-family: var(--font-quicksand);
 	--font-mono:
 		'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
 		'Courier New', monospace;
 
 	/* Colors */
 	--color-page: var(--bg-page);
+	--color-border: var(--border-color);
 	--color-surface: var(--bg-surface);
 	--color-surface-hover: var(--bg-surface-hover);
 	--color-main: var(--text-main);
@@ -33,6 +33,7 @@
 :root {
 	/* Light Mode */
 	--bg-page: #f8fafc;
+	--border-color: #e9ebee;
 	--bg-surface: #ffffff;
 	--bg-surface-hover: #f1f5f9;
 	--text-main: #0f172a;
@@ -50,6 +51,7 @@
 :root[data-theme='dark'] {
 	/* Dark Mode */
 	--bg-page: #161619;
+	--border-color: #2e3b4f;
 	--bg-surface: #1d293b;
 	--bg-surface-hover: #1e293b;
 	--text-main: #f8fafc;
