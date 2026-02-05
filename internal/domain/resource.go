@@ -1,6 +1,6 @@
 package domain
 
-import "window-service-watcher/pkg/sql"
+import "zenlight-support/pkg/sql"
 
 type Status int8
 

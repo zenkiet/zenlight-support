@@ -5,13 +5,13 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "service-watcher"
+    !define INFO_PROJECTNAME "zenlight-support"
 !endif
 !ifndef INFO_COMPANYNAME
     !define INFO_COMPANYNAME "ZenSoftware"
 !endif
 !ifndef INFO_PRODUCTNAME
-    !define INFO_PRODUCTNAME "Service Watcher"
+    !define INFO_PRODUCTNAME "Zenlight Support"
 !endif
 !ifndef INFO_PRODUCTVERSION
     !define INFO_PRODUCTVERSION "1.1.0"

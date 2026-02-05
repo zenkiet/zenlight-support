@@ -6,6 +6,7 @@
 	import { fade } from 'svelte/transition';
 	import './layout.css';
 	import { onMount } from 'svelte';
+	import { systemStore } from '$lib/stores/system.svelte';
 
 	let { children } = $props();
 
@@ -13,6 +14,7 @@
 
 	onMount(() => {
 		resourceStore.init();
+		systemStore.init();
 	});
 </script>
 
@@ -20,7 +22,7 @@
 	class="bg-surface-base flex h-screen w-screen flex-col overflow-hidden selection:bg-blue-500/30"
 >
 	<header
-		class="flex h-14 shrink-0 items-center justify-between border-b border-border bg-surface px-4 md:hidden"
+		class="flex h-14 shrink-0 items-center justify-between border-b border-muted/15 bg-surface px-4 md:hidden"
 	>
 		<div class="flex items-center gap-2">
 			<button
@@ -30,7 +32,7 @@
 			>
 				<i class="size-5 icon-[regular--list]"></i>
 			</button>
-			<span class="font-bold text-main">Service Watcher</span>
+			<span class="font-bold text-main">ZenLight Support</span>
 		</div>
 	</header>
 

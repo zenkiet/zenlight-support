@@ -17,7 +17,7 @@ import (
 
 var GH_TOKEN = "" // replace with your GitHub token
 
-const RepoURL = "https://api.github.com/repos/zenkiet/window-service-watcher/releases/latest"
+const RepoURL = "https://api.github.com/repos/zenkiet/zenlight-support/releases/latest"
 
 type UpdateInfo struct {
 	Available    bool   `json:"available"`

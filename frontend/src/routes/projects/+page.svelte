@@ -19,7 +19,7 @@
 					</div>
 				</div>
 				<span class="text-sm text-muted">
-					Manage your static project folders registered in ZenB Tool
+					Manage your static project folders registered in ZenLight Support.
 				</span>
 			</div>
 		</div>

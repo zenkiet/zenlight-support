@@ -14,9 +14,9 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"window-service-watcher/internal/app"
-	"window-service-watcher/internal/config"
-	"window-service-watcher/internal/service"
+	"zenlight-support/internal/app"
+	"zenlight-support/internal/config"
+	"zenlight-support/internal/service"
 )
 
 //go:embed all:frontend/dist
@@ -26,7 +26,7 @@ var assets embed.FS
 var rawVersion string
 var version = strings.TrimSpace(rawVersion)
 
-const uniqueAppID = "com.zensoftware.service-watcher"
+const uniqueAppID = "com.zensoftware.zenlight-support"
 
 func main() {
 	// Set up log output for debugging
@@ -64,8 +64,8 @@ func main() {
 
 	// Create application with options
 	errApp := wails.Run(&options.App{
-		Title:     "Zen Service Watcher",
-		MinWidth:  700,
+		Title:     "Zenlight Support",
+		MinWidth:  1050,
 		MinHeight: 800,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -92,7 +92,7 @@ func main() {
 		//    slog.Info("User clicked close, hiding window to background")
 
 		//    wailsRuntime.WindowHide(ctx)
-		//    wailsRuntime.EventsEmit(ctx, "notification", "Zen Watcher is running in background")
+		//    wailsRuntime.EventsEmit(ctx, "notification", "Zenlight Support is running in background")
 		//    return true
 		//  }
 		//  return false
@@ -101,13 +101,12 @@ func main() {
 			BackdropType:        windows.Mica,
 			EnableSwipeGestures: true,
 			DisableWindowIcon:   false,
-			Theme:               windows.Dark,
+			Theme:               windows.SystemDefault,
 		},
 		Mac: &mac.Options{
-			Appearance:          mac.NSAppearanceNameDarkAqua,
 			WindowIsTranslucent: true,
 			About: &mac.AboutInfo{
-				Title:   "Service Watcher",
+				Title:   "Zenlight Support",
 				Message: "Monitor your POS services",
 			},
 		},

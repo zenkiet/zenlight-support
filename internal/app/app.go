@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"time"
 
-	"window-service-watcher/internal/domain"
-	"window-service-watcher/pkg/sql"
+	"zenlight-support/internal/domain"
+	"zenlight-support/pkg/sql"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )

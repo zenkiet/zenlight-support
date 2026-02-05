@@ -4,7 +4,7 @@
 
 <Tooltip content="Comming soon">
 	<button
-		class="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-4 transition-all duration-300 cursor-pointer hover:border-primary hover:bg-blue-50 dark:hover:bg-blue-500/5 disabled:cursor-not-allowed disabled:opacity-30"
+		class="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted/15 p-4 transition-all duration-300 cursor-pointer hover:border-primary hover:bg-blue-50 dark:hover:bg-blue-500/5 disabled:cursor-not-allowed disabled:opacity-30"
 		disabled
 	>
 		<div

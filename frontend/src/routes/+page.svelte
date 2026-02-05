@@ -4,8 +4,8 @@
 	import { ServiceStatus } from '$lib/enums/service-status.enum';
 	import { resourceStore } from '$lib/stores/resources.svelte';
 
-	const runningCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.RUNNING).length);
-	const stoppedCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.STOPPED).length);
+	const runningCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.RUNNING && s.loading === false).length);
+	const stoppedCount = $derived(resourceStore.services.filter(s => s.status === ServiceStatus.STOPPED && s.loading === false).length);
 
 	let searchQuery = $state('');
 </script>
@@ -21,7 +21,7 @@
 			</div>
 			</div>
 			<span class="text-sm text-muted">
-				Manage your monitored services registered in ZenB Tool
+				Manage your monitored services registered in ZenLight Support.
 			</span>
 
 		</div>

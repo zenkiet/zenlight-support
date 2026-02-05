@@ -55,6 +55,10 @@
 					backgroundColor: 'transparent',
 					height: '100%'
 				},
+				'&.cm-focused': {
+					outline: 'none',
+					boxShadow: 'none'
+				},
 				'.cm-content': {
 					caretColor: isDark ? '#f8fafc' : '#0f172a',
 					fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
@@ -155,4 +159,4 @@
 	export const focus = () => view?.focus();
 </script>
 
-<div bind:this={container} class="h-full w-full bg-surface/60"></div>
+<div bind:this={container} class="h-full w-full bg-surface/60 border-b border-muted/15"></div>

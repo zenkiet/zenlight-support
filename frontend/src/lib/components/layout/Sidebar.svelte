@@ -35,14 +35,14 @@
 <aside
 	class={`
         fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 flex-col overflow-y-auto
-        border-r border-border bg-surface pt-5 shadow-2xl transition-transform duration-300 ease-in-out md:shadow-none
+        border-r border-muted/15 bg-surface pt-5 shadow-2xl transition-transform duration-300 ease-in-out md:shadow-none
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:static md:translate-x-0
     `}
 >
 	<div class="flex h-full flex-col px-4 pb-4">
 		<div class="mb-6 flex items-center justify-between gap-3">
-			<h1 class="text-lg font-bold tracking-tight text-main">ZenB Tool</h1>
+			<h1 class="text-lg font-bold tracking-tight text-main font-quicksand">ZenLight Support</h1>
 		</div>
 
 		{#each navGroups as group}

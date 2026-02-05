@@ -8,8 +8,20 @@ export interface Setting {
 	autoCheckUpdate: boolean;
 }
 
+export type ThemeScheme = 'light' | 'dark' | 'system';
+
 export class SystemStore {
-	isDark = $state(true);
+	scheme = $state<ThemeScheme>('system');
+
+	isDark = $derived.by(() => {
+		if (this.scheme === 'system') {
+			return typeof window !== 'undefined'
+				? window.matchMedia('(prefers-color-scheme: dark)').matches
+				: false;
+		}
+		return this.scheme === 'dark';
+	});
+
 	setting = $state<Setting>({
 		runBackground: false,
 		notifications: false,
@@ -26,13 +38,22 @@ export class SystemStore {
 		downloadUrl: ''
 	});
 
+	private schemeMediaQuery: MediaQueryList | null = null;
+
 	constructor() {
-		const saved = localStorage.getItem('theme');
-		if (saved) {
-			this.isDark = saved === 'dark';
-		} else {
-			this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const saved = localStorage.getItem('theme') as ThemeScheme | null;
+		if (saved === 'light' || saved === 'dark' || saved === 'system') {
+			this.scheme = saved;
 		}
+
+		if (typeof window !== 'undefined') {
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (this.scheme === 'system') {
+					this.applyTheme();
+				}
+			});
+		}
+
 		this.applyTheme();
 	}
 
@@ -59,18 +80,20 @@ export class SystemStore {
 	}
 
 	toggleTheme() {
-		this.isDark = !this.isDark;
+		const order: ThemeScheme[] = ['light', 'dark', 'system'];
+		const current = order.indexOf(this.scheme);
+		this.scheme = order[(current + 1) % 3];
 		this.applyTheme();
 	}
 
-	applyTheme() {
-		if (this.isDark) {
-			document.documentElement.setAttribute('data-theme', 'dark');
-			localStorage.setItem('theme', 'dark');
-		} else {
-			document.documentElement.setAttribute('data-theme', 'light');
-			localStorage.setItem('theme', 'light');
-		}
+	setScheme(scheme: ThemeScheme) {
+		this.scheme = scheme;
+		this.applyTheme();
+	}
+
+	private applyTheme() {
+		document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
+		localStorage.setItem('theme', this.scheme);
 	}
 }
 

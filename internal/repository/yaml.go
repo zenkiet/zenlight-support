@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 	"sync"
-	"window-service-watcher/internal/domain"
+	"zenlight-support/internal/domain"
 
 	"go.yaml.in/yaml/v3"
 )

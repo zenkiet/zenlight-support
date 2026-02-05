@@ -10,6 +10,8 @@
 @theme {
 	/* Fonts */
 	--font-sans: 'Inter', system-ui, sans-serif;
+	--font-quicksand: "Quicksand", sans-serif;
+	--font-family: var(--font-quicksand);
 	--font-mono:
 		'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
 		'Courier New', monospace;
@@ -18,7 +20,6 @@
 	--color-page: var(--bg-page);
 	--color-surface: var(--bg-surface);
 	--color-surface-hover: var(--bg-surface-hover);
-	--color-border: var(--border-color);
 	--color-main: var(--text-main);
 	--color-muted: var(--text-muted);
 	--color-primary: var(--primary);
@@ -34,7 +35,6 @@
 	--bg-page: #f8fafc;
 	--bg-surface: #ffffff;
 	--bg-surface-hover: #f1f5f9;
-	--border-color: #e9ebee;
 	--text-main: #0f172a;
 	--text-muted: #64748b;
 	--primary: #3b82f6;
@@ -52,7 +52,6 @@
 	--bg-page: #161619;
 	--bg-surface: #1d293b;
 	--bg-surface-hover: #1e293b;
-	--border-color: #2e3b4f;
 	--text-main: #f8fafc;
 	--text-muted: #94a3b8;
 	--primary: #60a5fa;
@@ -131,104 +130,4 @@
 	.glass-input {
 		@apply w-full rounded-lg border border-muted/10 bg-muted/10 px-3 py-2 text-sm transition-colors placeholder:text-neutral-500 focus:border-glass-highlight focus:outline-none;
 	}
-
-	/* .glass {
-		@apply shadow-xs backdrop-blur-md backdrop-saturate-150;
-		background: var(--card);
-		border: 1px solid var(--border);
-		color: var(--text);
-		transition:
-			background 180ms ease,
-			border-color 180ms ease,
-			box-shadow 180ms ease;
-	}
-
-	.input {
-		@apply form-input w-full rounded-xl px-3 py-2 text-sm transition outline-none;
-		border: 1px solid color-mix(in oklab, var(--border) 85%, transparent);
-		background: color-mix(in oklab, var(--card) 75%, transparent);
-		color: var(--text);
-	}
-
-	.input:focus {
-		border-color: color-mix(in oklab, var(--accent) 70%, var(--border));
-		background: color-mix(in oklab, var(--card) 90%, transparent);
-	}
-
-	.pill {
-		@apply rounded-full px-3 py-1 text-xs font-semibold;
-		background: rgba(255, 255, 255, 0.06);
-		color: color-mix(in oklab, var(--text) 85%, var(--muted));
-		transition:
-			background 180ms ease,
-			color 180ms ease;
-	}
-
-	.badge {
-		@apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold;
-		background: color-mix(in oklab, var(--accent) 18%, transparent);
-		color: color-mix(in oklab, var(--text) 90%, var(--accent));
-	} */
 }
-
-/* ===== Utilities (token-based) ===== */
-/* @layer utilities {
-	.border {
-		border-color: var(--border);
-	}
-
-	.text-primary {
-		color: var(--accent);
-	}
-
-	.text-muted {
-		color: var(--muted);
-	}
-
-	.bg-card {
-		background: var(--card);
-	}
-
-	.border-card {
-		border-color: var(--border);
-	}
-
-	.bg-glass {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-
-		&:hover {
-			background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-		}
-
-		&:active {
-			background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
-		}
-	}
-
-	.scrollable {
-		@apply overflow-y-auto;
-		scrollbar-width: thin;
-		scrollbar-color: rgba(148, 163, 184, 0.6) transparent;
-	}
-
-	.scrollable::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.scrollable::-webkit-scrollbar-thumb {
-		background: rgba(148, 163, 184, 0.6);
-		border-radius: 9999px;
-	}
-
-	@keyframes fadeWave {
-
-		0%,
-		100% {
-			opacity: 0.2;
-		}
-
-		50% {
-			opacity: 1;
-		}
-	}
-} */

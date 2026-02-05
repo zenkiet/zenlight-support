@@ -31,7 +31,7 @@ build-window:
 format:
 	@echo " > Formatting code..."
 	gofumpt -w .
-	goimports -w -local github.com/zenkiet/window-service-watcher .
+	goimports -w -local github.com/zenkiet/zenlight-support .
 
 lint:
 	@echo " > Linting..."

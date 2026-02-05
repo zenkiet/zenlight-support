@@ -8,9 +8,11 @@
 	onclick={() => systemStore.toggleTheme()}
 	aria-label="Toggle Theme"
 >
-	{#if systemStore.isDark}
+	{#if systemStore.scheme === 'dark'}
 		<i class="text-amber-300 icon-[regular--sun-bright]"></i>
-	{:else}
+	{:else if systemStore.scheme === 'light'}
 		<i class="text-slate-900/80 icon-[regular--moon-cloud]"></i>
+	{:else}
+		<i class="icon-[regular--desktop]"></i>
 	{/if}
 </button>

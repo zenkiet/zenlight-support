@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-	"window-service-watcher/internal/domain"
-	"window-service-watcher/pkg/sql"
+	"zenlight-support/internal/domain"
+	"zenlight-support/pkg/sql"
 
 	"github.com/shirou/gopsutil/v4/process"
 	"golang.org/x/sys/windows"

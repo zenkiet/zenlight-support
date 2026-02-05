@@ -53,11 +53,11 @@ jobs:
       - name: Build Windows Binary
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'window-service-watcher/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
+        run: wails build -platform windows/amd64 -clean -nsis -ldflags "-X 'zenlight-support/internal/app.GH_TOKEN=${{ secrets.GH_TOKEN }}'"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/bin/service-watcher.exe
-            build/bin/service-watcher-amd64-installer.exe
+            build/bin/zenlight-support.exe
+            build/bin/zenlight-support-amd64-installer.exe

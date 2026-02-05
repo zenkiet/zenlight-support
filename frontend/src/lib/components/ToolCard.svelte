@@ -27,7 +27,7 @@
         <i class="icon-[regular--arrow-down-to-line] size-5"></i>
         Install
       </button>
-      <button class="px-2 py-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-main text-sm font-medium rounded-lg transition-colors border border-border" title="Details">
+      <button class="px-2 py-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-main text-sm font-medium rounded-lg transition-colors border border-muted/15" title="Details">
         <i class="icon-[regular--folder] size-5"></i>
       </button>
     </div>

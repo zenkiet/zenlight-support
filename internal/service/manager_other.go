@@ -3,8 +3,8 @@
 package service
 
 import (
-	"window-service-watcher/internal/domain"
-	"window-service-watcher/pkg/sql"
+	"zenlight-support/internal/domain"
+	"zenlight-support/pkg/sql"
 )
 
 type MockManager struct {

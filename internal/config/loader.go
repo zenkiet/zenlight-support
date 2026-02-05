@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"window-service-watcher/internal/domain"
-	"window-service-watcher/internal/repository"
+	"zenlight-support/internal/domain"
+	"zenlight-support/internal/repository"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-version"

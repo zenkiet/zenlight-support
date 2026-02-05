@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { BrowserOpenURL } from '../../../wailsjs/runtime';
 	import { systemStore } from '$lib/stores/system.svelte';
 	import logo from '../../icons/logo.png';
 	import { formatDate } from '$lib/helpers';
+	import { bridge } from '$lib/services/wails-bridge';
 
 	/** State */
 	let checking = $state(false);
@@ -83,7 +83,7 @@
 				<img src={logo} alt="Logo" class="h-24 w-24 bg-transparent object-cover" />
 
 				<div class="flex flex-col gap-1">
-					<h3 class="font-semibold">Service Watcher</h3>
+					<h3 class="font-semibold font-quicksand">ZenLight Support</h3>
 					<p class="text-xs text-muted">Build {formatDate(systemStore.info.build ?? '')}</p>
 				</div>
 
@@ -110,22 +110,22 @@
 					class="flex w-full justify-between border-t border-muted/10 pt-4 text-xs text-muted/50"
 				>
 					<a
-						href="https://github.com/zenkiet/window-service-watcher/blob/main/LICENSE"
+						href="https://github.com/zenkiet/zenlight-support/blob/main/LICENSE"
 						target="_blank"
 						onclick={() =>
-							BrowserOpenURL('https://github.com/zenkiet/window-service-watcher/blob/main/LICENSE')}
+							bridge.openURL('https://github.com/zenkiet/zenlight-support/blob/main/LICENSE')}
 						class="transition-colors hover:text-muted">License</a
 					>
 					<a
-						href="https://buymeacoffee.com/zenkiet"
+						href="#"
 						target="_blank"
-						onclick={() => BrowserOpenURL('https://buymeacoffee.com/zenkiet')}
+						onclick={() => bridge.openURL('https://buymeacoffee.com/zenkiet')}
 						class="transition-colors hover:text-muted">Sponsor</a
 					>
 					<a
-						href="https://github.com/zenkiet/window-service-watcher"
+						href="#"
 						target="_blank"
-						onclick={() => BrowserOpenURL('https://github.com/zenkiet/window-service-watcher')}
+						onclick={() => bridge.openURL('https://github.com/zenkiet/zenlight-support')}
 						class="transition-colors hover:text-muted">GitHub</a
 					>
 				</div>

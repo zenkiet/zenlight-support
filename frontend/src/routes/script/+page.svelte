@@ -97,7 +97,7 @@
 		</div>
 
 		<div class="flex flex-1 flex-col overflow-hidden">
-			<div class="flex h-100 flex-col border-b border-border">
+			<div class="flex h-100 flex-col">
 				<SqlEditor value={data} onchange={(newValue) => (data = newValue)} />
 			</div>
 

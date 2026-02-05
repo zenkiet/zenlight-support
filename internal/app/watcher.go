@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 	"time"
-	"window-service-watcher/internal/domain"
+	"zenlight-support/internal/domain"
 )
 
 const (
