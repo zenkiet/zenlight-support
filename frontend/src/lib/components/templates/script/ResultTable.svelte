@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
 	import { scriptStore } from '$lib/stores/script.svelte';
+	import { VList } from 'virtua/svelte';
 
-	const status = $derived(scriptStore.result.state);
-	const executionTime = $derived(scriptStore.result.data?.executionTime);
-	const rowsAffected = $derived(scriptStore.result.data?.rowsAffected);
-
-	const data = $derived(scriptStore.result.data);
+	const { state: status, data, error } = $derived(scriptStore.result);
+	const cols = $derived(data?.columns ?? []);
+	const rows = $derived(data?.data ?? []);
+	const grid = $derived(`repeat(${cols.length}, minmax(150px, 1fr))`);
 </script>
 
 <div class="flex flex-1 flex-col overflow-hidden rounded-xl bg-surface">
@@ -28,83 +28,68 @@
 				</span>
 			{/if}
 		</div>
-
 		{#if status === 'completed'}
 			<div class="flex space-x-6 text-xs font-medium text-muted">
 				<span class="flex items-center">
 					<i class="mr-1.5 size-4 icon-[regular--clock]"></i>
-					{executionTime}
+					{data?.executionTime}
 				</span>
 				<span class="flex items-center">
 					<i class="mr-1.5 size-4 icon-[regular--table-cells-rows]"></i>
-					{rowsAffected} rows affected
+					{data?.rowsAffected} rows affected
 				</span>
 				<span class="flex items-center">
-					<i class="mr-1.5 size-4 icon-[regular--table]"></i>
-					{data?.columns?.length ?? 0} columns
+					<i class="mr-1.5 size-4 icon-[regular--record-vinyl]"></i>
+					{data?.data?.length ?? 0} record{(data?.data?.length ?? 0) !== 1 ? 's' : ''}
 				</span>
 			</div>
 		{/if}
 	</div>
 
 	{#if status === 'completed'}
-		<div class="flex-1 overflow-hidden bg-surface">
-			<div class="scrollable max-h-100 overflow-auto">
-				<table class="min-w-full text-left text-sm whitespace-nowrap">
-					<thead class="sticky top-0 z-10 border-b border-muted/15 bg-surface">
-						<tr>
-							{#each data?.columns as col}
-								<th
-									class="border-r border-muted/15 px-5 py-3 font-semibold text-main last:border-r-0"
-									>{col}</th
-								>
-							{/each}
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-border/60">
-						{#if data && data.data && data.data.length > 0}
-							{#each data.data as row}
-								<tr class="group transition-colors hover:bg-primary/5">
-									{#each row as cell}
-										<td
-											class="text-muted-foreground h-10 max-w-75 truncate px-4 py-2.5 align-middle whitespace-nowrap group-hover:text-main"
-											title={String(cell)}
-										>
-											{#if typeof cell === 'number' && cell > 1000}
-												<span class="font-mono text-emerald-600 dark:text-emerald-400"
-													>${cell.toLocaleString()}</span
-												>
-											{:else if String(cell).toUpperCase() === 'COMPLETED'}
-												<span class="font-medium text-blue-600 dark:text-blue-400">{cell}</span>
-											{:else}
-												{cell === null ? 'NULL' : String(cell)}
-											{/if}
-										</td>
-									{/each}
-								</tr>
-							{/each}
-						{:else}
-							<tr>
-								<td
-									colspan={data?.columns?.length}
-									class="px-4 py-12 text-center text-muted italic"
-								>
-									No data available
-								</td>
-							</tr>
-						{/if}
-					</tbody>
-				</table>
-			</div>
+		<div
+			class="flex flex-1 flex-col scrollable overflow-x-auto overflow-y-hidden bg-surface text-sm whitespace-nowrap"
+		>
+			{#if rows.length > 0}
+				<div class="flex flex-1 flex-col" style="min-width: {cols.length * 150}px;">
+					<div
+						class="shrink-0 border-b border-muted/15 bg-surface"
+						style="display:grid;grid-template-columns:{grid};"
+					>
+						{#each cols as col}
+							<div
+								class="border-r border-muted/15 px-5 py-3 font-semibold text-main last:border-r-0"
+							>
+								{col}
+							</div>
+						{/each}
+					</div>
+
+					<VList data={rows} class="h-[40vh]!" getKey={(_, i) => i}>
+						{#snippet children(row)}
+							<div
+								class="group border-b border-border/60 transition-colors hover:bg-primary/5"
+								style="display:grid;grid-template-columns:{grid};"
+							>
+								{#each row as cell}
+									<div class="h-10 max-w-75 truncate px-4 py-2.5 text-muted group-hover:text-main">
+										{cell === null ? 'NULL' : String(cell)}
+									</div>
+								{/each}
+							</div>
+						{/snippet}
+					</VList>
+				</div>
+			{:else}
+				<div class="px-4 py-12 text-center text-muted italic">No data available</div>
+			{/if}
 		</div>
 	{/if}
 
 	{#if status === 'error'}
 		<div class="scrollable flex-1 overflow-auto bg-surface p-4">
 			<div class="w-full rounded-lg border border-rose-500/20 bg-rose-500/10 p-4">
-				<p class="text-sm text-rose-600 dark:text-rose-400">
-					{scriptStore.result.error}
-				</p>
+				<p class="text-sm text-rose-600 dark:text-rose-400">{error}</p>
 			</div>
 		</div>
 	{/if}

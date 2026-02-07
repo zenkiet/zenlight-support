@@ -47,6 +47,7 @@
     "@codemirror/view": "^6.39.12",
     "@lezer/highlight": "^1.2.3",
     "codemirror": "^6.0.2",
-    "sql-formatter": "^15.7.0"
+    "sql-formatter": "^15.7.0",
+    "virtua": "^0.48.5"
   }
 }
