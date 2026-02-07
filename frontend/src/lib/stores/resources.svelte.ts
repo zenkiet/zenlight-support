@@ -17,7 +17,7 @@ import { SvelteMap } from 'svelte/reactivity';
 
 export class Resource {
 	/** States */
-	readonly config = $state<domain.ResourceConfig>();
+	config = $state<domain.ResourceConfig>();
 	status = $state<ServiceStatus>(ServiceStatus.STOPPED);
 	metrics = $state<ResourceMetrics>({
 		pid: 0,
@@ -30,7 +30,7 @@ export class Resource {
 	constructor(config: domain.ResourceConfig) {
 		this.config = config;
 
-		if(this.isDirectory) {
+		if (this.isDirectory) {
 			this.getMetrics();
 		}
 	}
@@ -110,25 +110,49 @@ export class Resource {
 		this.metrics = res.data;
 	}
 
+	async save(data: Partial<domain.ResourceConfig>) {
+		this.loading = true;
+		const res = await bridge.createOrUpdate({ ...this.config!, ...data });
+		this.loading = false;
+
+		if (!res.success) {
+			console.error(`Failed to save ${this.config!.name}:`, res.error);
+			throw new Error(res.error);
+		} else {
+			this.config = res.data;
+		}
+	}
+
+	async delete() {
+		this.loading = true;
+		const res = await bridge.delete(this.config!.id);
+		this.loading = false;
+
+		if (!res.success) {
+			console.error(`Failed to delete ${this.config!.name}:`, res.error);
+			throw new Error(res.error);
+		}
+	}
+
 	update(payload: { status?: ServiceStatus; metrics?: Partial<ResourceMetrics> }) {
 		if (payload.status) {
-      this.status = payload.status;
-      this.metrics = {
-        pid: 0,
-        createTime: 0,
-        cpu: 0,
-        mem: 0
-      }
-    }
-		if (payload.metrics && payload.status === ServiceStatus.RUNNING) this.metrics = { ...this.metrics, ...payload.metrics };
-
-
-    this.loading = false;
+			this.status = payload.status;
+			this.metrics = {
+				pid: 0,
+				createTime: 0,
+				cpu: 0,
+				mem: 0
+			};
+		}
+		if (payload.metrics && payload.status === ServiceStatus.RUNNING) {
+			this.metrics = { ...this.metrics, ...payload.metrics };
+		}
+		this.loading = false;
 	}
 }
 
 export class ResourceStore {
-  initialized = $state<boolean>(false);
+	initialized = $state<boolean>(false);
 	private _items = new SvelteMap<string, Resource>();
 	items = $derived(Array.from(this._items.values()));
 
@@ -151,22 +175,22 @@ export class ResourceStore {
 	}
 
 	async init() {
-    try {
-      const res = await Promise.all([bridge.service.get(), bridge.directory.get()]);
-      const [svcRes, dirRes] = res;
+		try {
+			const res = await Promise.all([bridge.service.get(), bridge.directory.get()]);
+			const [svcRes, dirRes] = res;
 
-      if (svcRes.success) {
-        svcRes.data.forEach((cfg) => this._items.set(cfg.id, new Resource(cfg)));
-      }
+			if (svcRes.success) {
+				svcRes.data.forEach((cfg) => this._items.set(cfg.id, new Resource(cfg)));
+			}
 
-      if (dirRes.success) {
-        dirRes.data.forEach((cfg) => this._items.set(cfg.id, new Resource(cfg)));
-      }
-      this.initialized = true;
-    } catch (error) {
-      console.error('Failed to initialize ResourceStore:', error);
-      return;
-    }
+			if (dirRes.success) {
+				dirRes.data.forEach((cfg) => this._items.set(cfg.id, new Resource(cfg)));
+			}
+			this.initialized = true;
+		} catch (error) {
+			console.error('Failed to initialize ResourceStore:', error);
+			return;
+		}
 	}
 
 	get(id: string) {

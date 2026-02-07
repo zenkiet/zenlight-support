@@ -6,6 +6,8 @@ import {domain} from '../models';
 
 export function CheckUpdate():Promise<app.UpdateInfo>;
 
+export function DeleteResource(arg1:string):Promise<void>;
+
 export function DoUpdate(arg1:string):Promise<void>;
 
 export function ExecuteSQLScript(arg1:string,arg2:string):Promise<sql.Result>;
@@ -25,6 +27,8 @@ export function Install(arg1:string,arg2:Array<domain.InstallFileDTO>):Promise<v
 export function OpenExplorer(arg1:string):Promise<void>;
 
 export function RestartApp():Promise<void>;
+
+export function SaveResource(arg1:domain.ResourceConfig):Promise<domain.ResourceConfig>;
 
 export function StartService(arg1:string):Promise<void>;
 

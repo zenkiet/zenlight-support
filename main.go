@@ -38,7 +38,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	// Load configuration
-	cfg, err := config.LoadConfig(version)
+	cfg, repo, err := config.LoadConfig(version)
 	if err != nil {
 		slog.Error("Failed to load config:", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -46,7 +46,7 @@ func main() {
 
 	// Initialize
 	srvMgr := service.NewManager()
-	a := app.NewApp(*cfg, srvMgr, version)
+	a := app.NewApp(*cfg, srvMgr, repo, version)
 
 	// Create application menu
 	// appMenu := menu.NewMenu()
