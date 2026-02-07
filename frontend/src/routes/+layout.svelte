@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
-	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
 	import UpdateModal from '$lib/components/modals/UpdateModal.svelte';
 	import { resourceStore } from '$lib/stores/resources.svelte';
 	import { fade } from 'svelte/transition';
@@ -70,8 +69,4 @@
 	</main>
 
 	<UpdateModal />
-
-	<div class="fixed right-4 bottom-4 z-30 md:right-6 md:bottom-6">
-		<ThemeToggle />
-	</div>
 </div>

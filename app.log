@@ -1,5 +1,0 @@
-2026/01/22 11:15:53 cannot call 'github.com/wailsapp/wails/v2/pkg/runtime.LogInfo': An invalid context was passed. This method requires the specific context given in the lifecycle hooks:
-https://wails.io/docs/reference/runtime/intro
-2026/01/22 14:35:54 Unsolicited response received on idle HTTP channel starting with "HTTP/1.1 400 Bad Request\r\n\r\n"; err=<nil>
-2026/01/22 14:35:54 Unsolicited response received on idle HTTP channel starting with "HTTP/1.1 400 Bad Request\r\n\r\n"; err=<nil>
-2026/01/22 15:19:31 suppressing panic for copyResponse error in test; copy error: request has been stopped

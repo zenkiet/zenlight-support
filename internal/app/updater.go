@@ -67,8 +67,6 @@ func (a *App) CheckUpdate() UpdateInfo {
 		return errorUpdateInfo(fmt.Errorf("failed to decode release info: %w", err))
 	}
 
-	fmt.Println("Checking for updates...")
-
 	current, _ := version.NewVersion(a.appVer)
 	latest, err := version.NewVersion(release.TagName)
 	if err != nil {
@@ -79,7 +77,7 @@ func (a *App) CheckUpdate() UpdateInfo {
 		return UpdateInfo{Available: false, CurrentVer: a.appVer, LatestVer: release.TagName, Build: release.CreatedAt}
 	}
 
-	downloadURL := findAsset(release.Assets, "service-watcher.exe")
+	downloadURL := findAsset(release.Assets, "zenlight-support.exe")
 	if downloadURL == "" {
 		return errorUpdateInfo(fmt.Errorf("no suitable asset found for download"))
 	}
