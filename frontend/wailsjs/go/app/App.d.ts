@@ -12,6 +12,10 @@ export function DoUpdate(arg1:string):Promise<void>;
 
 export function ExecuteSQLScript(arg1:string,arg2:string):Promise<sql.Result>;
 
+export function ExportConfig():Promise<string>;
+
+export function GetConfigPath():Promise<string>;
+
 export function GetDirectories():Promise<Array<domain.ResourceConfig>>;
 
 export function GetResourceMetrics(arg1:string):Promise<domain.ResourceMetrics>;
@@ -21,6 +25,8 @@ export function GetServiceStatus(arg1:string):Promise<domain.Status>;
 export function GetServices():Promise<Array<domain.ResourceConfig>>;
 
 export function GetSqlConfig():Promise<domain.SQLConfig>;
+
+export function ImportConfig():Promise<void>;
 
 export function Install(arg1:string,arg2:Array<domain.InstallFileDTO>):Promise<void>;
 

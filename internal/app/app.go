@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"go.yaml.in/yaml/v3"
 )
 
 type App struct {
@@ -336,4 +337,88 @@ func (a *App) GetSqlConfig() (*domain.SQLConfig, error) {
 
 func (a *App) ExecuteSQLScript(id string, script string) (*sql.Result, error) {
 	return a.mgr.ExecuteSQLScript(a.cfg.SQLConfig.Server, a.cfg.SQLConfig.Database, script)
+}
+
+func (a *App) ExportConfig() (string, error) {
+	cfg, err := a.repo.Load()
+	if err != nil {
+		return "", fmt.Errorf("failed to load config: %w", err)
+	}
+
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	// Open native save dialog
+	savePath, err := wailsRuntime.SaveFileDialog(a.Ctx, wailsRuntime.SaveDialogOptions{
+		DefaultFilename: fmt.Sprintf("config-backup-%s.yaml", time.Now().Format("2006-01-02")),
+		Title:           "Save Config Backup",
+		Filters: []wailsRuntime.FileFilter{
+			{DisplayName: "YAML Files", Pattern: "*.yaml;*.yml"},
+		},
+	})
+	if err != nil {
+		return "", fmt.Errorf("dialog error: %w", err)
+	}
+	if savePath == "" {
+		return "", nil // user cancelled
+	}
+
+	if err := os.WriteFile(savePath, data, 0644); err != nil {
+		return "", fmt.Errorf("failed to write backup: %w", err)
+	}
+
+	return savePath, nil
+}
+
+func (a *App) ImportConfig() error {
+	// Open native file dialog
+	openPath, err := wailsRuntime.OpenFileDialog(a.Ctx, wailsRuntime.OpenDialogOptions{
+		Title: "Select Config File to Restore",
+		Filters: []wailsRuntime.FileFilter{
+			{DisplayName: "YAML Files", Pattern: "*.yaml;*.yml"},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("dialog error: %w", err)
+	}
+	if openPath == "" {
+		return nil // user cancelled
+	}
+
+	content, err := os.ReadFile(openPath)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	var cfg domain.Config
+	if err := yaml.Unmarshal(content, &cfg); err != nil {
+		return fmt.Errorf("invalid config format: %w", err)
+	}
+
+	// Backup current config
+	backupPath := fmt.Sprintf("%s.%s.bak", a.repo.Path, time.Now().Format("20060102_150405"))
+	currentData, err := os.ReadFile(a.repo.Path)
+	if err == nil {
+		_ = os.WriteFile(backupPath, currentData, 0644)
+	}
+
+	// Save new config
+	if err := a.repo.Save(&cfg); err != nil {
+		return fmt.Errorf("failed to save imported config: %w", err)
+	}
+
+	// Update in-memory state
+	a.cfg = cfg
+	a.itemMap = make(map[string]domain.ResourceConfig)
+	for _, item := range cfg.Resources {
+		a.itemMap[item.ID] = item
+	}
+
+	return nil
+}
+
+func (a *App) GetConfigPath() string {
+	return a.repo.Path
 }
