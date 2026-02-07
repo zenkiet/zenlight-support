@@ -2,13 +2,15 @@
 	import { slide, fade } from 'svelte/transition';
 	import SettingsGeneral from '$lib/components/settings/SettingsGeneral.svelte';
 	import SettingsAppearance from '$lib/components/settings/SettingsAppearance.svelte';
+	import SettingsBackup from '$lib/components/settings/SettingsBackup.svelte';
 	import SettingsAbout from '$lib/components/settings/SettingsAbout.svelte';
 
-	type SettingsTab = 'general' | 'appearance' | 'about';
+	type SettingsTab = 'general' | 'appearance' | 'backup' | 'about';
 
 	const tabs: { id: SettingsTab; label: string }[] = [
 		{ id: 'general', label: 'General' },
 		{ id: 'appearance', label: 'Appearance' },
+		{ id: 'backup', label: 'Backup' },
 		{ id: 'about', label: 'About' }
 	];
 
@@ -49,6 +51,8 @@
 					<SettingsGeneral />
 				{:else if activeTab === 'appearance'}
 					<SettingsAppearance />
+				{:else if activeTab === 'backup'}
+					<SettingsBackup />
 				{:else if activeTab === 'about'}
 					<SettingsAbout />
 				{/if}
