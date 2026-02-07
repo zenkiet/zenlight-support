@@ -2,10 +2,12 @@
 	import { formatRelativeTime, readFileAsBytes } from '$lib/helpers';
 	import type { Resource } from '$lib/stores/resources.svelte';
 	import InstallModal from './modals/InstallModal.svelte';
+	import EditResourceModal from './modals/EditResourceModal.svelte';
 
 	let { service } = $props<{ service: Resource }>();
 
 	let showInstallModal = $state(false);
+	let showEditModal = $state(false);
 
 	async function handleInstall(files: File[]) {
 		if (!files || files.length === 0) return;
@@ -19,6 +21,10 @@
 			};
 		});
 		await service.install(await Promise.all(payload));
+	}
+
+	async function handleSave(newConfig: typeof service.config) {
+		await service.save(newConfig);
 	}
 </script>
 
@@ -35,10 +41,18 @@
 
 			<div class="flex flex-col">
 				<div class="flex items-center">
-					<span class="mr-2 h-2 w-2 shrink-0 rounded-full {service.isRunning ? 'bg-emerald-500' : service.loading ? 'bg-muted/50' : 'bg-rose-500'}"
+					<span
+						class="mr-2 h-2 w-2 shrink-0 rounded-full {service.isRunning
+							? 'bg-emerald-500'
+							: service.loading
+								? 'bg-muted/50'
+								: 'bg-rose-500'}"
 					></span>
 					<h3 class="truncate font-semibold" title={service.config?.name}>
-						<button class="hover:underline cursor-pointer hover:text-accent transition-colors duration-200" onclick={() => service.openExplorer()}>
+						<button
+							class="cursor-pointer transition-colors duration-200 hover:text-accent hover:underline"
+							onclick={() => service.openExplorer()}
+						>
 							{service.config?.name}
 						</button>
 					</h3>
@@ -54,23 +68,28 @@
 		</div>
 
 		<div class="flex gap-2">
+			<button
+				title="edit service"
+				onclick={() => (showEditModal = true)}
+				class="cursor-pointer text-muted/80 transition-colors hover:text-main"
+			>
+				<span class="icon-[regular--pen-to-square]"></span>
+			</button>
+
 			{#if service.config?.installable}
 				<button
 					title="install service"
 					onclick={() => (showInstallModal = true)}
 					class="cursor-pointer text-muted/80 transition-colors hover:text-main"
 				>
-					<span class="icon-[regular--folder-arrow-up]"></span>
+					<span class="icon-[regular--cloud-arrow-up]"></span>
 				</button>
 			{/if}
 
 			<button
 				onclick={service.isRunning ? () => service.stop() : () => service.start()}
 				disabled={service.loading}
-				class={`
-       cursor-pointer text-muted/80 transition-colors hover:text-main
-
-    `}
+				class="cursor-pointer text-muted/80 transition-colors hover:text-main"
 			>
 				{#if service.loading}
 					<span class="animate-spin icon-[regular--spinner]"></span>
@@ -109,6 +128,13 @@
 	targetName={service.config?.name}
 	onClose={() => (showInstallModal = false)}
 	onInstall={handleInstall}
+/>
+
+<EditResourceModal
+	isOpen={showEditModal}
+	config={service.config!}
+	onClose={() => (showEditModal = false)}
+	onSave={handleSave}
 />
 
 {#snippet metric(label: string, value: string, colorClass: string)}

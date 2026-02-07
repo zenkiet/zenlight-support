@@ -64,16 +64,21 @@ func defaultConfig(appVer string) domain.Config {
 	}
 }
 
-func LoadConfig(appVer string) (*domain.Config, error) {
+func LoadConfig(appVer string) (*domain.Config, *repository.YamlConfigRepository, error) {
 	exePath, err := os.Executable()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get executable path: %w", err)
+		return nil, nil, fmt.Errorf("failed to get executable path: %w", err)
 	}
 	exeDir := filepath.Dir(exePath)
 	configPath := filepath.Join(exeDir, fileName)
 	repo := repository.NewYamlConfigRepository(configPath)
 
-	return ensureConfig(repo, appVer)
+	cfg, err := ensureConfig(repo, appVer)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return cfg, repo, nil
 }
 
 func ensureConfig(repo *repository.YamlConfigRepository, appVer string) (*domain.Config, error) {

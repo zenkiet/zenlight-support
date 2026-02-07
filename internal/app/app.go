@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"zenlight-support/internal/domain"
+	"zenlight-support/internal/repository"
 	"zenlight-support/pkg/sql"
 
+	"github.com/google/uuid"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -20,12 +22,13 @@ type App struct {
 	Ctx     context.Context
 	cfg     domain.Config
 	mgr     domain.ResourceManager
+	repo    *repository.YamlConfigRepository
 	itemMap map[string]domain.ResourceConfig
 	watcher *ServiceWatcher
 	appVer  string
 }
 
-func NewApp(cfg domain.Config, mgr domain.ResourceManager, appVer string) *App {
+func NewApp(cfg domain.Config, mgr domain.ResourceManager, repo *repository.YamlConfigRepository, appVer string) *App {
 	itemMap := make(map[string]domain.ResourceConfig)
 	for _, item := range cfg.Resources {
 		itemMap[item.ID] = item
@@ -34,6 +37,7 @@ func NewApp(cfg domain.Config, mgr domain.ResourceManager, appVer string) *App {
 	return &App{
 		cfg:     cfg,
 		mgr:     mgr,
+		repo:    repo,
 		itemMap: itemMap,
 		watcher: NewServiceWatcher(cfg, mgr),
 		appVer:  appVer,
@@ -273,6 +277,57 @@ func (a *App) GetResourceMetrics(id string) (*domain.ResourceMetrics, error) {
 	}
 
 	return nil, fmt.Errorf("unsupported resource type for metrics: %s", id)
+}
+
+func (a *App) SaveResource(resource domain.ResourceConfig) (*domain.ResourceConfig, error) {
+	if resource.ID == "" {
+		resource.ID = uuid.NewString()
+		a.cfg.Resources = append(a.cfg.Resources, resource)
+	} else {
+		found := false
+		for i, r := range a.cfg.Resources {
+			if r.ID == resource.ID {
+				a.cfg.Resources[i] = resource
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("resource not found for ID: %s", resource.ID)
+		}
+	}
+
+	a.itemMap[resource.ID] = resource
+
+	if err := a.repo.Save(&a.cfg); err != nil {
+		return nil, fmt.Errorf("failed to save config: %w", err)
+	}
+
+	return &resource, nil
+}
+
+func (a *App) DeleteResource(id string) error {
+	if _, ok := a.itemMap[id]; !ok {
+		return fmt.Errorf("resource not found for ID: %s", id)
+	}
+
+	// Remove from resources slice
+	for i, r := range a.cfg.Resources {
+		if r.ID == id {
+			a.cfg.Resources = append(a.cfg.Resources[:i], a.cfg.Resources[i+1:]...)
+			break
+		}
+	}
+
+	// Remove from in-memory map
+	delete(a.itemMap, id)
+
+	// Persist to config file
+	if err := a.repo.Save(&a.cfg); err != nil {
+		return fmt.Errorf("failed to save config: %w", err)
+	}
+
+	return nil
 }
 
 func (a *App) GetSqlConfig() (*domain.SQLConfig, error) {

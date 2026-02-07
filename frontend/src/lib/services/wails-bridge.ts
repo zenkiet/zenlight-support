@@ -8,7 +8,9 @@ import {
 	Install,
 	GetResourceMetrics,
 	ExecuteSQLScript,
-	GetSqlConfig
+	GetSqlConfig,
+	SaveResource,
+	DeleteResource,
 } from '../../../wailsjs/go/app/App';
 import type { domain } from '../../../wailsjs/go/models';
 import { safeCall } from '$lib/utils/result';
@@ -25,7 +27,9 @@ export const WailsBridge = {
 	fetchServices: () => safeCall(GetServices()),
 	fetchDirectories: () => safeCall(GetDirectories()),
 	fetchSQLConfig: () => safeCall(GetSqlConfig()),
-	executeSQLScript: (id: string, script: string) => safeCall(ExecuteSQLScript(id, script))
+	executeSQLScript: (id: string, script: string) => safeCall(ExecuteSQLScript(id, script)),
+	saveResource: (resource: domain.ResourceConfig) => safeCall(SaveResource(resource)),
+	deleteResource: (id: string) => safeCall(DeleteResource(id)),
 };
 
 export const bridge = {

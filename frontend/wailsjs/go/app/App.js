@@ -6,6 +6,10 @@ export function CheckUpdate() {
   return window['go']['app']['App']['CheckUpdate']();
 }
 
+export function DeleteResource(arg1) {
+  return window['go']['app']['App']['DeleteResource'](arg1);
+}
+
 export function DoUpdate(arg1) {
   return window['go']['app']['App']['DoUpdate'](arg1);
 }
@@ -44,6 +48,10 @@ export function OpenExplorer(arg1) {
 
 export function RestartApp() {
   return window['go']['app']['App']['RestartApp']();
+}
+
+export function SaveResource(arg1) {
+  return window['go']['app']['App']['SaveResource'](arg1);
 }
 
 export function StartService(arg1) {

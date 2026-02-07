@@ -125,11 +125,23 @@
 		}
 	}
 
-	.glass-btn {
+	.btn {
 		@apply flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-muted/10 bg-muted/10 px-4 py-2 text-sm font-medium transition-colors hover:border-muted/20 hover:bg-muted/20 active:bg-muted/10;
+
+		&.secondary {
+			@apply border-none bg-transparent hover:bg-muted/10 active:bg-muted/20 text-main hover:text-main;
+		}
+
+		&.primary {
+			@apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80 border-transparent;
+		}
+
+		&:disabled {
+			@apply cursor-not-allowed opacity-50;
+		}
 	}
 
-	.glass-input {
-		@apply w-full rounded-lg border border-muted/10 bg-muted/10 px-3 py-2 text-sm transition-colors placeholder:text-neutral-500 focus:border-glass-highlight focus:outline-none;
+	.input {
+		@apply w-full rounded-lg border border-muted/15 px-3 py-2 text-sm transition-colors placeholder:text-neutral-500 focus:border-primary/50 focus:outline-none;
 	}
 }

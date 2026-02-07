@@ -1,15 +1,22 @@
 <script lang="ts">
-	import { formatDate, formatFullDateTime, formatRelativeTime, readFileAsBytes } from '$lib/helpers';
+	import {
+		formatDate,
+		formatFullDateTime,
+		formatRelativeTime,
+		readFileAsBytes
+	} from '$lib/helpers';
 	import type { Resource } from '$lib/stores/resources.svelte';
 	import InstallModal from './modals/InstallModal.svelte';
+	import EditResourceModal from './modals/EditResourceModal.svelte';
 
 	let { project } = $props<{ project: Resource }>();
 
 	let showInstallModal = $state(false);
+	let showEditModal = $state(false);
 
 	const dateModified = $derived(
 		project.metrics.lastModified ? formatFullDateTime(project.metrics.lastModified) : '--'
-	)
+	);
 	const totalSize = $derived(
 		project.metrics.totalSize ? `${(project.metrics.totalSize / 1024 / 1024).toFixed(1)} MB` : '--'
 	);
@@ -27,6 +34,10 @@
 
 		await project.install(payload);
 	}
+
+	async function handleSave(newConfig: typeof project.config) {
+		await project.save(newConfig);
+	}
 </script>
 
 <div
@@ -37,7 +48,7 @@
 			<div class="flex flex-col">
 				<h3 class="truncate font-semibold" title={project.config?.name}>
 					<button
-						class="transitio n-colors cursor-pointer duration-200
+						class="transition-colors cursor-pointer duration-200
 					hover:text-accent hover:underline"
 						onclick={() => project.openExplorer()}
 					>
@@ -55,11 +66,18 @@
 
 		<div class="flex gap-2">
 			<button
+				title="Edit project"
+				onclick={() => (showEditModal = true)}
+				class="cursor-pointer text-muted/80 transition-colors hover:text-main"
+			>
+				<span class="icon-[regular--pen-to-square]"></span>
+			</button>
+			<button
 				title="Install project"
 				onclick={() => (showInstallModal = true)}
 				class="cursor-pointer text-muted/80 transition-colors hover:text-main"
 			>
-				<span class="icon-[regular--folder-arrow-up]"></span>
+				<span class="icon-[regular--cloud-arrow-up]"></span>
 			</button>
 		</div>
 	</div>
@@ -80,6 +98,13 @@
 	fileHint="Supported: .zip, .html, asset files..."
 	onClose={() => (showInstallModal = false)}
 	onInstall={handleInstall}
+/>
+
+<EditResourceModal
+	isOpen={showEditModal}
+	config={project.config!}
+	onClose={() => (showEditModal = false)}
+	onSave={handleSave}
 />
 
 {#snippet metric(label: string, value: string, colorClass: string)}
