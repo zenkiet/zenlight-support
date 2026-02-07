@@ -96,31 +96,41 @@
 </script>
 
 {#if isOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<button
+			class="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/60"
+			onclick={close}
+			aria-label="Close"
+		></button>
+
 		<div
-			class="relative flex min-h-75 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-muted/15 bg-page ring-1 ring-muted/10"
+			class="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-muted/15 bg-surface shadow-2xl dark:border-muted/10"
 			role="none"
 			transition:scale={{ start: 0.96, duration: 250, easing: cubicOut }}
 		>
 			{#if status === 'idle'}
-				<div class="flex shrink-0 items-center justify-between border-b border-muted/10 px-5 py-4">
-					<div>
-						<h3 class="font-semibold">Install {targetType}</h3>
-						<p class="text-xs text-muted/60">
-							{subtitlePrefix} <span class="text-blue-400">{targetName}</span>
-						</p>
+				<!-- Header -->
+				<div class="flex items-center justify-between border-b border-muted/10 px-5 py-4">
+					<div class="flex items-center gap-3">
+						<div>
+							<h3 class="text-base font-semibold text-main">Install {targetType}</h3>
+							<p class="text-xs text-muted/60">
+								{subtitlePrefix}
+								<span class="font-medium text-blue-500 dark:text-blue-400">{targetName}</span>
+							</p>
+						</div>
 					</div>
-
 					<button
 						onclick={close}
-						title="Close"
-						class="cursor-pointer text-muted/60 transition-colors hover:text-muted"
+						aria-label="Close"
+						class="absolute top-3 right-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted/40 transition-colors hover:bg-muted/8 hover:text-muted"
 					>
-						<i class="icon-[regular--x]"> </i>
+						<span class="text-sm icon-[regular--x]"></span>
 					</button>
 				</div>
 
-				<div class="scrollable flex max-h-[60vh] flex-col overflow-y-auto p-5">
+				<!-- Content -->
+				<div class="scrollable flex max-h-[60vh] flex-col overflow-y-auto p-4">
 					<input
 						type="file"
 						multiple
@@ -128,8 +138,10 @@
 						class="hidden"
 						onchange={handleFileSelect}
 					/>
+
+					<!-- Drop zone -->
 					<button
-						class={`relative flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-300 ${files.length > 0 ? 'py-6' : 'py-12'} ${isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-muted/10 bg-muted/2 hover:border-muted/20 hover:bg-muted/5'}`}
+						class={`flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-200 ${files.length > 0 ? 'py-4' : 'py-10'} ${isDragging ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/8' : 'border-muted/12 hover:border-muted/25 hover:bg-muted/3'}`}
 						ondragover={(e) => {
 							e.preventDefault();
 							isDragging = true;
@@ -138,115 +150,119 @@
 						ondrop={handleDrop}
 						onclick={() => fileInput?.click()}
 					>
-						<div class="pointer-events-none flex flex-col items-center">
-							<i
-								class={`transition-colors icon-[regular--cloud-arrow-up] ${files.length > 0 ? 'mb-2 size-6' : 'mb-3 size-8'} ${isDragging ? 'text-blue-400' : 'text-muted/50'}`}
-							></i>
-							<p class="text-sm text-muted/60">
-								<span class="font-medium text-blue-400">Click to upload</span> or drag files
-							</p>
-							{#if files.length === 0}
-								<p class="mt-1 text-xs text-muted/30" transition:fade>
-									{fileHint}
-								</p>
-							{/if}
-						</div>
+						<span
+							class={`transition-colors icon-[regular--cloud-arrow-up] ${files.length > 0 ? 'mb-1.5 text-xl' : 'mb-2 text-2xl'} ${isDragging ? 'text-blue-400' : 'text-muted/35'}`}
+						></span>
+						<p class="text-sm text-muted/50">
+							<span class="font-medium text-blue-500 dark:text-blue-400">Browse</span> or drop files
+						</p>
+						{#if files.length === 0}
+							<p class="mt-1 text-xs text-muted/30" transition:fade>{fileHint}</p>
+						{/if}
 					</button>
 
+					<!-- File list -->
 					{#if files.length > 0}
-						<div class="mt-4 flex flex-col gap-2">
-							<div class="flex items-center justify-between px-1">
-								<span class="text-xs font-bold tracking-wider text-muted/30 uppercase"
-									>Queue ({files.length})</span
+						<div class="mt-3 flex flex-col gap-1.5">
+							<div class="flex items-center justify-between px-0.5">
+								<span class="text-[10px] font-bold tracking-widest text-muted/35 uppercase">
+									Files ({files.length})
+								</span>
+								<span class="font-mono text-[10px] text-muted/30">{formatBytes(totalSize)}</span>
+							</div>
+							{#each files as file, i (file.name + file.size)}
+								<div
+									class="group flex items-center gap-2.5 rounded-lg border border-muted/10 p-2 transition-colors hover:bg-muted/4"
+									transition:slide={{ duration: 150, axis: 'y' }}
 								>
-								<span class="font-mono text-xs text-muted/40">Total: {formatBytes(totalSize)}</span>
-							</div>
-							<div class="flex flex-col gap-2">
-								{#each files as file, i (file.name + file.size)}
 									<div
-										class="group flex items-center gap-3 rounded-lg border border-muted/30 bg-muted/10 p-2 pr-3 transition-colors hover:border-muted/40 hover:bg-muted/20"
-										transition:slide={{ duration: 200, axis: 'y' }}
+										class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 dark:bg-emerald-500/8"
 									>
-										<div
-											class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-page/20"
-										>
-											<i class="size-5 text-emerald-400 icon-[regular--file-code]"></i>
-										</div>
-										<div class="flex min-w-0 flex-1 flex-col">
-											<span class="truncate text-sm font-medium" title={file.name}>{file.name}</span
-											>
-											<span class="text-xs text-muted/40">{formatBytes(file.size)}</span>
-										</div>
-
-										<button
-											onclick={() => removeFile(i)}
-											title="Remove File"
-											class="cursor-pointer text-muted/30 transition-all hover:text-rose-400"
-										>
-											<i class="size-3 icon-[regular--x]"></i>
-										</button>
+										<i class=" text-emerald-500 icon-[regular--file-code] dark:text-emerald-400"
+										></i>
 									</div>
-								{/each}
-							</div>
+									<div class="flex min-w-0 flex-1 flex-col">
+										<span class="truncate text-sm font-medium text-main" title={file.name}
+											>{file.name}</span
+										>
+										<span class="text-[11px] text-muted/40">{formatBytes(file.size)}</span>
+									</div>
+									<button
+										onclick={() => removeFile(i)}
+										aria-label="Remove file"
+										class="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-muted/25 opacity-0 transition-all group-hover:opacity-100 hover:text-rose-500"
+									>
+										<span class="text-xs icon-[regular--x]"></span>
+									</button>
+								</div>
+							{/each}
 						</div>
 					{/if}
 				</div>
 
-				<div
-					class="mt-auto flex shrink-0 items-center justify-end gap-3 border-t border-muted/10 bg-page/20 px-5 py-3"
-				>
+				<!-- Actions -->
+				<div class="flex items-center justify-end gap-2 border-t border-muted/10 px-4 py-3">
 					<button
 						onclick={close}
-						class="rounded-lg px-4 py-2 text-xs font-medium text-muted/60 transition-colors hover:bg-muted/10 hover:text-muted"
-						>Cancel</button
+						class="cursor-pointer rounded-lg px-3.5 py-2 text-xs font-medium text-muted/50 transition-colors hover:bg-muted/6 hover:text-muted"
 					>
+						Cancel
+					</button>
 					<button
 						onclick={submit}
 						disabled={files.length === 0}
-						class="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+						class="flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
 					>
-						<i class="icon-[regular--download]"></i>
-						<span>Install</span>
+						<span class="text-xs icon-[regular--download]"></span>
+						Install
 					</button>
 				</div>
 			{:else}
+				<!-- Status states -->
 				<div
-					class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"
-					in:fade={{ duration: 300 }}
+					class="flex min-h-70 flex-col items-center justify-center p-8 text-center"
+					in:fade={{ duration: 200 }}
 				>
 					{#if status === 'installing'}
-						<div class="relative mb-6">
+						<div class="relative mb-5">
 							<div
-								class="h-16 w-16 animate-spin rounded-full border-4 border-muted/15 border-t-blue-500"
+								class="h-14 w-14 animate-spin rounded-full border-[3px] border-muted/10 border-t-blue-500"
 							></div>
 							<div class="absolute inset-0 flex items-center justify-center">
-								<i class="animate-pulse text-2xl text-blue-400 icon-[regular--gear]"></i>
+								<span class="animate-pulse text-lg text-blue-400 icon-[regular--gear]"></span>
 							</div>
 						</div>
-						<h3 class="text-lg font-medium">Installing {targetType}...</h3>
-						<p class="mt-2 text-sm text-muted/40">Please wait while we update your files.</p>
+						<h3 class="text-base font-semibold text-main">Installing...</h3>
+						<p class="mt-1.5 text-xs text-muted/45">Updating files for {targetName}</p>
 					{:else if status === 'success'}
 						<div
-							class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20"
+							class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 ring-1 ring-emerald-200 dark:bg-emerald-500/10 dark:ring-emerald-500/20"
 							in:scale={{ start: 0.5, duration: 400, easing: elasticOut }}
 						>
-							<i class="size-8 text-emerald-400 icon-[regular--circle-check]"></i>
+							<span
+								class="size-7 text-emerald-600 icon-[regular--circle-check] dark:text-emerald-400"
+							></span>
 						</div>
-						<h3 class="text-xl font-bold" in:slide={{ delay: 100 }}>Success!</h3>
-						<p class="mt-2 text-sm text-muted/40" in:slide={{ delay: 200 }}>
-							{targetType} has been updated successfully.
+						<h3 class="text-lg font-bold text-main" in:slide={{ delay: 100 }}>Installed!</h3>
+						<p class="mt-1.5 text-xs text-muted/45" in:slide={{ delay: 200 }}>
+							{targetType} updated successfully
 						</p>
 					{:else if status === 'error'}
 						<div
-							class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-500/20"
+							class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 ring-1 ring-rose-200 dark:bg-rose-500/10 dark:ring-rose-500/20"
 							in:scale={{ start: 0.5, duration: 400, easing: elasticOut }}
 						>
-							<i class="size-8 text-rose-400 icon-[regular--diamond-exclamation]"></i>
+							<span
+								class="size-7 text-rose-600 icon-[regular--diamond-exclamation] dark:text-rose-400"
+							></span>
 						</div>
-						<h3 class="text-xl font-bold text-rose-500" in:slide={{ delay: 100 }}>
-							Installation Failed
+						<h3
+							class="text-lg font-bold text-rose-600 dark:text-rose-400"
+							in:slide={{ delay: 100 }}
+						>
+							Failed
 						</h3>
-						<p class="mt-2 max-w-[80%] text-sm text-rose-500/60" in:slide={{ delay: 200 }}>
+						<p class="mt-1.5 max-w-[80%] text-xs text-muted/50" in:slide={{ delay: 200 }}>
 							{errMsg}
 						</p>
 					{/if}
