@@ -38,8 +38,6 @@ export class SystemStore {
 		downloadUrl: ''
 	});
 
-	private schemeMediaQuery: MediaQueryList | null = null;
-
 	constructor() {
 		const saved = localStorage.getItem('theme') as ThemeScheme | null;
 		if (saved === 'light' || saved === 'dark' || saved === 'system') {

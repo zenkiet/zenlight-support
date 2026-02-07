@@ -18,10 +18,7 @@
 		},
 		{
 			title: 'Configuration',
-			items: [
-				{ name: 'Settings', icon: 'icon-[regular--gear-complex]', href: '/settings' }
-				// { name: 'Logs', icon: 'icon-[regular--rectangle-history]', href: '/logs' }
-			]
+			items: [{ name: 'Settings', icon: 'icon-[regular--gear-complex]', href: '/settings' }]
 		}
 	];
 
@@ -34,53 +31,60 @@
 
 <aside
 	class={`
-        fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 flex-col overflow-y-auto
-        border-r border-muted/15 bg-surface pt-5 shadow-2xl transition-transform duration-300 ease-in-out md:shadow-none
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:static md:translate-x-0
-    `}
+		fixed inset-y-0 left-0 z-50 flex h-full w-60 shrink-0 flex-col
+		border-r border-muted/10 bg-surface transition-transform duration-300 ease-in-out
+		${isOpen ? 'translate-x-0' : '-translate-x-full'}
+		md:static md:translate-x-0
+	`}
 >
-	<div class="flex h-full flex-col px-4 pb-4">
-		<div class="mb-6 flex items-center justify-between gap-3">
-			<h1 class="text-lg font-bold tracking-tight text-main font-quicksand">ZenLight Support</h1>
-		</div>
+	<!-- Brand -->
+	<div class="flex h-14 items-center gap-3 border-b border-muted/10 px-5">
+		<span class="font-quicksand font-bold tracking-tight text-main">ZenLight Support</span>
+	</div>
 
-		{#each navGroups as group}
-			<nav class="mb-6 space-y-1">
-				<p class="mb-2 px-3 text-xs font-semibold tracking-wider text-muted/70 uppercase">
-					{group.title}
-				</p>
+	<!-- Navigation -->
+	<nav class="scrollable flex-1 overflow-y-auto px-3 py-4">
+		{#each navGroups as group, gi}
+			{#if gi > 0}
+				<div class="my-3 h-px bg-muted/8"></div>
+			{/if}
+			<p class="mb-2 px-2 text-[10px] font-semibold tracking-widest text-muted/50 uppercase">
+				{group.title}
+			</p>
+			<ul class="flex flex-col gap-0.5">
 				{#each group.items as item}
 					{@render navItem(item)}
 				{/each}
-			</nav>
+			</ul>
 		{/each}
-	</div>
+	</nav>
 
-	<div class="mt-auto">
-		<Footer />
-	</div>
+	<Footer />
 </aside>
 
 {#snippet navItem(item: { name: string; icon: string; href: string })}
 	{@const active = isItemActive(item.href)}
-	<a
-		href={item.href}
-		onclick={() => window.innerWidth < 768 && onClose?.()}
-		class={`group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200
-        ${
+	<li>
+		<a
+			href={item.href}
+			onclick={() => window.innerWidth < 768 && onClose?.()}
+			class={`group relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150
+				${
 					active
-						? 'bg-blue-50 text-primary dark:bg-blue-500/10'
-						: 'hover:bg-surface-highlight text-muted hover:text-main'
+						? 'bg-blue-500/8 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+						: 'text-muted/70 hover:bg-muted/6 hover:text-main'
 				}`}
-	>
-		<div
-			class={`absolute top-0 left-0 h-full w-1 rounded-l-md bg-blue-500 transition-opacity ${
-				active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-			}`}
-		></div>
+		>
+			{#if active}
+				<div
+					class="absolute top-1/2 left-0 h-5 w-0.75 -translate-y-1/2 rounded-r-full bg-blue-500"
+				></div>
+			{/if}
 
-		<i class="{item.icon} size-4"></i>
-		{item.name}
-	</a>
+			<span
+				class={`${item.icon} size-4 transition-colors ${active ? 'text-blue-500 dark:text-blue-400' : 'text-muted/50 group-hover:text-muted'}`}
+			></span>
+			{item.name}
+		</a>
+	</li>
 {/snippet}
