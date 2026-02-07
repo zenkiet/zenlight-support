@@ -62,8 +62,14 @@ func (e *Executor) executeQuery(ctx context.Context, db *sql.DB, script string, 
 		return nil, fmt.Errorf("failed to get columns: %w", err)
 	}
 
+	const maxRows = 1000
+
 	var data [][]interface{}
 	for rows.Next() {
+		if len(data) >= maxRows {
+			return nil, fmt.Errorf("query result exceeds maximum row limit of %d. Please narrow your query with a WHERE or TOP clause", maxRows)
+		}
+
 		row := make([]interface{}, len(columns))
 		rowPtrs := make([]interface{}, len(columns))
 		for i := range row {

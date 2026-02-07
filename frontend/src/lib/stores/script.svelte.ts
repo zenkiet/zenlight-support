@@ -25,7 +25,7 @@ class ScriptStore {
 			const res = await bridge.script.executeSQL(id, script);
 
 			if (res.success) {
-				this.result = { state: 'completed', data: res.data };
+				this.result = { state: 'completed', data: Object.freeze(res.data) };
 			} else {
 				this.result = { state: 'error', error: res.error };
 			}
@@ -49,6 +49,10 @@ class ScriptStore {
 			console.error('Failed to initialize ScriptStore:', error);
 			return;
 		}
+	}
+
+	reset() {
+		this.result = { state: 'idle', data: undefined, error: undefined };
 	}
 }
 
