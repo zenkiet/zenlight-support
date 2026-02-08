@@ -1,6 +1,6 @@
 //go:build !windows
 
-package service
+package platform
 
 import (
 	"zenlight-support/internal/domain"

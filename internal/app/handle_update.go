@@ -17,7 +17,7 @@ import (
 
 var GH_TOKEN = "" // replace with your GitHub token
 
-const RepoURL = "https://api.github.com/repos/zenkiet/zenlight-support/releases/latest"
+const repoURL = "https://api.github.com/repos/zenkiet/zenlight-support/releases/latest"
 
 type UpdateInfo struct {
 	Available    bool   `json:"available"`
@@ -29,65 +29,65 @@ type UpdateInfo struct {
 	Error        string `json:"error,omitempty"`
 }
 
-type asset struct {
+type releaseAsset struct {
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
 }
 
-type Release struct {
-	TagName   string  `json:"tag_name"`
-	CreatedAt string  `json:"created_at"`
-	Body      string  `json:"body"`
-	Assets    []asset `json:"assets"`
+type release struct {
+	TagName   string         `json:"tag_name"`
+	CreatedAt string         `json:"created_at"`
+	Body      string         `json:"body"`
+	Assets    []releaseAsset `json:"assets"`
 }
 
 func (a *App) CheckUpdate() UpdateInfo {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", RepoURL, nil)
-	req.Header.Set("Authorization", "token "+GH_TOKEN)
+	req, err := http.NewRequestWithContext(ctx, "GET", repoURL, nil)
 	if err != nil {
-		return errorUpdateInfo(err)
+		return errorUpdateInfo(err, a.appVer)
 	}
+	req.Header.Set("Authorization", "token "+GH_TOKEN)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return errorUpdateInfo(err)
+		return errorUpdateInfo(err, a.appVer)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errorUpdateInfo(fmt.Errorf("unexpected status code: %d", resp.StatusCode))
+		return errorUpdateInfo(fmt.Errorf("unexpected status code: %d", resp.StatusCode), a.appVer)
 	}
 
-	var release Release
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return errorUpdateInfo(fmt.Errorf("failed to decode release info: %w", err))
+	var rel release
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
+		return errorUpdateInfo(fmt.Errorf("failed to decode release info: %w", err), a.appVer)
 	}
 
 	current, _ := version.NewVersion(a.appVer)
-	latest, err := version.NewVersion(release.TagName)
+	latest, err := version.NewVersion(rel.TagName)
 	if err != nil {
-		return errorUpdateInfo(fmt.Errorf("invalid tag format in release: %s", release.TagName))
+		return errorUpdateInfo(fmt.Errorf("invalid tag format in release: %s", rel.TagName), a.appVer)
 	}
 
 	if latest.LessThanOrEqual(current) {
-		return UpdateInfo{Available: false, CurrentVer: a.appVer, LatestVer: release.TagName, Build: release.CreatedAt}
+		return UpdateInfo{Available: false, CurrentVer: a.appVer, LatestVer: rel.TagName, Build: rel.CreatedAt}
 	}
 
-	downloadURL := findAsset(release.Assets, "zenlight-support.exe")
+	downloadURL := findAsset(rel.Assets, "zenlight-support.exe")
 	if downloadURL == "" {
-		return errorUpdateInfo(fmt.Errorf("no suitable asset found for download"))
+		return errorUpdateInfo(fmt.Errorf("no suitable asset found for download"), a.appVer)
 	}
 
 	return UpdateInfo{
 		Available:    true,
 		CurrentVer:   a.appVer,
-		Build:        release.CreatedAt,
-		LatestVer:    release.TagName,
-		ReleaseNotes: release.Body,
+		Build:        rel.CreatedAt,
+		LatestVer:    rel.TagName,
+		ReleaseNotes: rel.Body,
 		DownloadURL:  downloadURL,
 	}
 }
@@ -103,8 +103,7 @@ func (a *App) DoUpdate(downloadURL string) error {
 	}
 	defer resp.Body.Close()
 
-	err = selfupdate.Apply(resp.Body, selfupdate.Options{})
-	if err != nil {
+	if err := selfupdate.Apply(resp.Body, selfupdate.Options{}); err != nil {
 		return fmt.Errorf("update failed: %w", err)
 	}
 	return nil
@@ -117,16 +116,16 @@ func (a *App) RestartApp() {
 	os.Exit(0)
 }
 
-func errorUpdateInfo(err error) UpdateInfo {
-	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: "v0.0.0"}
+func errorUpdateInfo(err error, appVer string) UpdateInfo {
+	return UpdateInfo{Available: false, Error: err.Error(), CurrentVer: appVer}
 }
 
-func findAsset(assets []asset, appName string) string {
+func findAsset(assets []releaseAsset, appName string) string {
 	targetExt := ".exe"
 	targetArch := runtime.GOARCH
 
-	for _, asset := range assets {
-		name := strings.ToLower(asset.Name)
+	for _, a := range assets {
+		name := strings.ToLower(a.Name)
 		if !strings.Contains(name, strings.ToLower(appName)) {
 			continue
 		}
@@ -139,7 +138,7 @@ func findAsset(assets []asset, appName string) string {
 		if strings.Contains(name, "arm64") && targetArch != "arm64" {
 			continue
 		}
-		return asset.BrowserDownloadURL
+		return a.BrowserDownloadURL
 	}
 	return ""
 }

@@ -16,7 +16,7 @@ import (
 
 	"zenlight-support/internal/app"
 	"zenlight-support/internal/config"
-	"zenlight-support/internal/service"
+	"zenlight-support/internal/platform"
 )
 
 //go:embed all:frontend/dist
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// Initialize
-	srvMgr := service.NewManager()
+	srvMgr := platform.NewManager()
 	a := app.NewApp(*cfg, srvMgr, repo, version)
 
 	// Create application menu

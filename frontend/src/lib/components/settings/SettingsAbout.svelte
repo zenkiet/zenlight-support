@@ -47,7 +47,9 @@
 
 			<div class="flex flex-col gap-1.5">
 				<h3 class="font-quicksand text-lg font-semibold">ZenLight Support</h3>
-				<p class="text-xs text-muted/70">Build {formatDate(systemStore.info.build ?? '')}</p>
+				{#if systemStore.info.build}
+					<p class="text-xs text-muted/70">Build Date: {formatDate(systemStore.info.build)}</p>
+				{/if}
 			</div>
 
 			<div
