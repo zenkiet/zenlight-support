@@ -18,6 +18,14 @@ export function ExecuteSQLScript(arg1, arg2) {
   return window['go']['app']['App']['ExecuteSQLScript'](arg1, arg2);
 }
 
+export function ExportConfig() {
+  return window['go']['app']['App']['ExportConfig']();
+}
+
+export function GetConfigPath() {
+  return window['go']['app']['App']['GetConfigPath']();
+}
+
 export function GetDirectories() {
   return window['go']['app']['App']['GetDirectories']();
 }
@@ -36,6 +44,10 @@ export function GetServices() {
 
 export function GetSqlConfig() {
   return window['go']['app']['App']['GetSqlConfig']();
+}
+
+export function ImportConfig() {
+  return window['go']['app']['App']['ImportConfig']();
 }
 
 export function Install(arg1, arg2) {
