@@ -11,6 +11,9 @@ import {
 	GetSqlConfig,
 	SaveResource,
 	DeleteResource,
+	ExportConfig,
+	ImportConfig,
+	GetConfigPath
 } from '../../../wailsjs/go/app/App';
 import type { domain } from '../../../wailsjs/go/models';
 import { safeCall } from '$lib/utils/result';
@@ -30,6 +33,9 @@ export const WailsBridge = {
 	executeSQLScript: (id: string, script: string) => safeCall(ExecuteSQLScript(id, script)),
 	saveResource: (resource: domain.ResourceConfig) => safeCall(SaveResource(resource)),
 	deleteResource: (id: string) => safeCall(DeleteResource(id)),
+	exportConfig: () => safeCall(ExportConfig()),
+	importConfig: () => safeCall(ImportConfig()),
+	getConfigPath: () => safeCall(GetConfigPath()),
 };
 
 export const bridge = {
@@ -45,11 +51,18 @@ export const bridge = {
 		get: WailsBridge.fetchDirectories,
 	},
 	openExplorer: WailsBridge.openExplorer,
+	createOrUpdate: WailsBridge.saveResource,
+	delete: WailsBridge.deleteResource,
 	install: WailsBridge.installService,
 	metrics: WailsBridge.GetResourceMetrics,
 	script: {
 		get: WailsBridge.fetchSQLConfig,
 		executeSQL: WailsBridge.executeSQLScript,
+	},
+	config: {
+		export: WailsBridge.exportConfig,
+		import: WailsBridge.importConfig,
+		path: WailsBridge.getConfigPath,
 	}
 }
 
